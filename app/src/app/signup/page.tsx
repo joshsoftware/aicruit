@@ -1,7 +1,9 @@
-export default function SignUp() {
-    return (
-        <div>
-            <h1>Sign Up</h1>
-        </div>
-      );
+import UserForm from "@/components/UserForm";
+
+export default function Singup() {
+  return (
+    <div className="flex flex-1 justify-center items-center">
+      <UserForm formType="signup" />
+    </div>
+  );
 }
