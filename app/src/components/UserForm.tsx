@@ -46,9 +46,9 @@ const UserForm = (props: UserFormProps) => {
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm flex flex-col gap-4 justify-center items-center"
-        style={{ fontSize: "14px", padding: "20px" }}
+        style={{ fontSize: "14px" }}
       >
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold mt-4">
           {isSignup ? "Sign Up" : "Sign In"}
         </h1>
 
@@ -62,7 +62,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -73,7 +73,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.officeEmail}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -84,7 +84,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.mobile}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -95,7 +95,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.designation}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -106,7 +106,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -117,7 +117,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
           </>
@@ -133,7 +133,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -144,7 +144,7 @@ const UserForm = (props: UserFormProps) => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-md"
+                className="w-full px-2 py-1 border rounded-md"
               />
             </div>
           </>
@@ -152,7 +152,7 @@ const UserForm = (props: UserFormProps) => {
 
         <Button
           type="submit"
-          className="bg-[#668D7E] hover:bg-[#668D7E] text-white w-full"
+          className="bg-[#3F37C9] hover:bg-[#668D7E] text-white w-full"
         >
           {isSignup ? "Sign Up" : "Sign In"}
         </Button>
