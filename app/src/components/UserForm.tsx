@@ -1,179 +1,220 @@
 "use client";
 
-interface UserFormProps {
-  formType: "signup" | "signin";
-}
-
-import { useState } from "react";
-import "../app/globals.css";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { Input } from "./ui/input";
 import { Button, buttonVariants } from "./ui/button";
-import { cn } from "../lib/utils";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  SignupUserRequest,
+  signupUserSchema,
+  SigninUserRequest,
+  signinUserSchema
+} from "@/Validators/register";
+import Link from "next/link";
 
 interface UserFormProps {
-  formType: "signup" | "signin";
+  formType: "signin" | "signup";
 }
 
 const UserForm = (props: UserFormProps) => {
   const { formType } = props;
 
   const isSignup = formType === "signup";
-
-  const [formData, setFormData] = useState({
-    name: "",
-    officeEmail: "",
-    mobile: "",
-    designation: "",
-    password: "",
-    confirmPassword: "",
-    email: "",
+  const form = useForm<SignupUserRequest | SigninUserRequest>({
+    resolver: zodResolver(isSignup ? signupUserSchema : signinUserSchema),
+    defaultValues: isSignup
+      ? {
+          name: "",
+          officeEmail: "",
+          mobile: "",
+          designation: "",
+          password: "",
+          confirmPassword: ""
+        }
+      : { officeEmail: "", password: "" },
+    mode: "all"
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = (data: SignupUserRequest | SigninUserRequest) => {
+    // submit data to the server
+    console.log(data);
   };
 
   return (
     <div className="flex flex-col gap-2 w-full justify-center items-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm flex flex-col gap-4 justify-center items-center"
-        style={{ fontSize: "14px" }}
-      >
-        <h1 className="text-3xl font-bold mt-4">
-          {isSignup ? "Sign Up" : "Sign In"}
-        </h1>
-
-        {isSignup ? (
-          <>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="officeEmail">Office Email</label>
-              <input
-                type="email"
-                name="officeEmail"
-                value={formData.officeEmail}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="mobile">Mobile</label>
-              <input
-                type="text"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="designation">Designation</label>
-              <input
-                type="text"
-                name="designation"
-                value={formData.designation}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="email" className="block text-sm font-medium">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-2 py-1 border rounded-md"
-              />
-            </div>
-          </>
-        )}
-
-        <Button
-          type="submit"
-          className="bg-[#3F37C9] hover:bg-[#668D7E] text-white w-full"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="w-full max-w-sm flex flex-col gap-2 justify-center items-center"
         >
-          {isSignup ? "Sign Up" : "Sign In"}
-        </Button>
-      </form>
+          <h1 className="text-3xl font-bold mt-4">
+            {isSignup ? "Sign Up" : "Sign In"}
+          </h1>
 
-      <div>
-        <div className="flex flex-col text-sm gap-1 justify-center items-center">
-          <Link
-            href={isSignup ? "/signin" : "/signup"}
-            className={cn(
-              buttonVariants({
-                variant: "link",
-                className: "text-[#668D7E] hover:text-[#668D7E] font-bold",
-              }),
-            )}
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <FormField
+              control={form.control}
+              name="officeEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Office Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="email"
+                      placeholder="Enter your Office Email"
+                      className="p-1 text-xs h-8"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {isSignup && (
+            <>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="Enter your Name"
+                          className="p-1 text-xs h-8"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <FormField
+                  control={form.control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="Enter your Mobile Number"
+                          className="p-1 text-xs h-8"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <FormField
+                  control={form.control}
+                  name="designation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Designation</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="Enter your Designation"
+                          className="p-1 text-xs h-8"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Enter your Password"
+                      className="p-1 text-xs h-8"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {isSignup && (
+            <div className="grid w-full max-w-sm items-center gap-1.5">
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        placeholder="Confirm your Password"
+                        className="p-1 text-xs h-8"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            className="bg-[#668D7E] hover:bg-[#668D7E] text-white w-full"
           >
-            {isSignup
-              ? "Already have an Acount? Sign In"
-              : "Don't have an Account ? Sign Up "}
-          </Link>
-        </div>
+            {isSignup ? "Sign Up" : "Sign In"}
+          </Button>
+        </form>
+      </Form>
+
+      <div className="flex flex-col text-sm gap-1 justify-center items-center">
+        <Link
+          href={isSignup ? "/signin" : "/signup"}
+          className={cn(
+            buttonVariants({
+              variant: "link",
+              className: "text-[#668D7E] hover:text-[#668D7E] font-bold"
+            })
+          )}
+        >
+          {isSignup
+            ? "Already have an Account? Sign In"
+            : "Don't have an Account? Sign Up"}
+        </Link>
       </div>
     </div>
   );
