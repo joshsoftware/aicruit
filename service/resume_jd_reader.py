@@ -5,7 +5,7 @@
 #jd_reader is used to read the jd content from the google docs and returns a string.
 
 
-from drive_connector import *
+from service.drive_connector import *
 from typing import *
 from dotenv import load_dotenv
 import os
