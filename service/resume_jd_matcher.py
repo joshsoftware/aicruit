@@ -1,9 +1,9 @@
 #This code is used to initiate the llama model and perform operations.
 
-from resume_jd_reader import *
-from jd_extractor import extract_using_regex
+from service.resume_jd_reader import *
+from service.jd_extractor import extract_using_regex
 from langchain_ollama import OllamaLLM
-import matcher_prompt 
+import service.matcher_prompt as matcher_prompt 
 
 def matcher():
     file = drive_reader()
