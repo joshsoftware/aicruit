@@ -4,7 +4,7 @@
 
 import re
 import json
-from resume_jd_reader import jd_reader,drive_reader
+from service.resume_jd_reader import jd_reader,drive_reader
 from typing import Dict,List,Optional
 
 def extract_using_regex () ->  Dict[str,List[str]]:

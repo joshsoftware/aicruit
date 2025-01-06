@@ -2,8 +2,8 @@
 #Change the prompt accoring to the need and change variables if needed.
 
 from langchain_core.prompts import PromptTemplate
-from resume_jd_matcher import resume_reader
-from jd_extractor import extract_using_regex
+from service.resume_jd_matcher import resume_reader
+from service.jd_extractor import extract_using_regex
 
 def generate_matching_prompt(jd,resume):
 
