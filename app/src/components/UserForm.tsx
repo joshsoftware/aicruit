@@ -18,7 +18,7 @@ import {
   signupUserSchema,
   SigninUserRequest,
   signinUserSchema,
-} from "@/Validators/register";
+} from "@/validators/register";
 
 import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
@@ -82,7 +82,7 @@ const UserForm = (props: UserFormProps) => {
                   name="contact"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact</FormLabel>
+                      <FormLabel>Contact number</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -156,8 +156,8 @@ const UserForm = (props: UserFormProps) => {
             )}
           >
             {isSignup
-              ? "Already have an Acount? Sign In"
-              : "Don't have an Account ? Sign Up "}
+              ? "Already have an account? Sign in"
+              : "Don't have an account? Sign up"}
           </Link>
         </div>
       </div>

@@ -4,8 +4,9 @@ import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { SigninUserRequest, SignupUserRequest } from "@/Validators/register";
+import { SigninUserRequest, SignupUserRequest } from "@/validators/register";
 import { useState } from "react";
+import { ValidationMessage } from "@/constants/messages";
 
 export const useUser = () => {
   const router = useRouter();
@@ -18,17 +19,17 @@ export const useUser = () => {
       return response.data;
     },
     onSuccess: async (res) => {
-      toast.success("User Registered Successfully");
+      toast.success(ValidationMessage.SIGNUP_SUCCESS);
       router.push("/");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 422) {
-          return toast.error("Failed to Register User", {
+          return toast.error(ValidationMessage.SIGNUP_FAILED, {
             description: error.message,
           });
         } else if (error.response?.status === 409) {
-          return toast.error("User already exists, please sign in", {
+          return toast.error(ValidationMessage.USER_EXISTS, {
             action: {
               label: "Signin",
               onClick: () => router.push("/signin"),
@@ -36,9 +37,7 @@ export const useUser = () => {
           });
         }
       }
-      return toast.error(
-        "Failed to Register User, please try again in some time"
-      );
+      return toast.error(ValidationMessage.CUSTOM_ERROR);
     },
     onSettled: () => {
       setDisableSubmit(false);
@@ -52,8 +51,7 @@ export const useUser = () => {
       return response.data;
     },
     onSuccess: async (res) => {
-      toast.success("User sign in Successfull");
-      debugger;
+      toast.success(ValidationMessage.SIGNIN_SUCCESS);
       router.push(res?.role == "hr" ? "/analysis" : "/");
     },
     onError: (error) => {
@@ -63,19 +61,17 @@ export const useUser = () => {
             description: error.message,
           });
         } else if (error.response?.status === 404) {
-          return toast.error("User does not exists", {
+          return toast.error(ValidationMessage.USER_DOES_NOT_EXISTS, {
             action: {
               label: "Signup",
               onClick: () => router.push("/signup"),
             },
           });
         } else if (error.response?.status === 401) {
-          return toast.error("Incorrect username or password");
+          return toast.error(ValidationMessage.INVALID_CREDENTIALS);
         }
       }
-      return toast.error(
-        "Failed to sign in User, please try again in some time"
-      );
+      return toast.error(ValidationMessage.CUSTOM_ERROR);
     },
     onSettled: () => {
       setDisableSubmit(false);

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { buttonVariants } from "./ui/button";
 import Link from "next/link";
 import { User } from "lucia";
+import { ValidationMessage } from "@/constants/messages";
 
 const Landing = (attr: { user: User | null }) => {
   return (
@@ -13,11 +14,10 @@ const Landing = (attr: { user: User | null }) => {
           AiCruit
         </h1>
         <h1 className={cn(primaryFont.className, "text-4xl mt-2")}>
-          AI-POWERED HR RECRUITMENT SYSTEM
+          AI-POWERED RECRUITMENT SYSTEM
         </h1>
         <p className={cn(secondaryFont.className, "text-xl ")}>
-          An advanced AI-powered solution designed to streamline the recruitment
-          process for HR departments.
+          {ValidationMessage.LANDING_PAGE}
         </p>
         <div className="w-full flex">
           <Link
@@ -31,7 +31,7 @@ const Landing = (attr: { user: User | null }) => {
         </div>
       </div>
       <Image
-        src={"/landingFrame.svg"}
+        src={"/landing-frame.svg"}
         className="self-center mt-12"
         width={400}
         height={4}
