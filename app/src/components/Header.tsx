@@ -19,7 +19,7 @@ const Header = () => {
         </Link>
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <Image
-            src={"/JoshDarkLogo.svg"}
+            src={"/josh-logo.svg"}
             className="self-center"
             width={131}
             height={29}
