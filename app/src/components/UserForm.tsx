@@ -9,7 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,8 +17,10 @@ import {
   SignupUserRequest,
   signupUserSchema,
   SigninUserRequest,
-  signinUserSchema
-} from "@/Validators/register";
+  signinUserSchema,
+} from "@/validators/register";
+
+import { useUser } from "@/hooks/useUser";
 import Link from "next/link";
 
 interface UserFormProps {
@@ -28,65 +30,37 @@ interface UserFormProps {
 const UserForm = (props: UserFormProps) => {
   const { formType } = props;
 
+  const { disableSubmit, isPending, signupUser, signinUser } = useUser();
   const isSignup = formType === "signup";
   const form = useForm<SignupUserRequest | SigninUserRequest>({
     resolver: zodResolver(isSignup ? signupUserSchema : signinUserSchema),
     defaultValues: isSignup
-      ? {
-          name: "",
-          officeEmail: "",
-          mobile: "",
-          designation: "",
-          password: "",
-          confirmPassword: ""
-        }
-      : { officeEmail: "", password: "" },
-    mode: "all"
+      ? { password: "", userEmail: "", userName: "", contact: "" }
+      : { password: "", userEmail: "" },
+    mode: "all",
   });
 
-  const onSubmit = (data: SignupUserRequest | SigninUserRequest) => {
-    // submit data to the server
-    console.log(data);
-  };
+  const onSubmit = (data: SignupUserRequest | SigninUserRequest) =>
+    isSignup
+      ? signupUser(data as SignupUserRequest)
+      : signinUser(data as SigninUserRequest);
 
   return (
     <div className="flex flex-col gap-2 w-full justify-center items-center">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full max-w-sm flex flex-col gap-2 justify-center items-center"
+          className="w-full max-w-sm flex flex-col gap-6 justify-center items-center"
         >
-          <h1 className="text-3xl font-bold mt-4">
+          <h1 className="text-3xl font-bold">
             {isSignup ? "Sign Up" : "Sign In"}
           </h1>
-
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <FormField
-              control={form.control}
-              name="officeEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Office Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Enter your Office Email"
-                      className="p-1 text-xs h-8"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           {isSignup && (
             <>
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="userName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Name</FormLabel>
@@ -95,7 +69,6 @@ const UserForm = (props: UserFormProps) => {
                           {...field}
                           type="text"
                           placeholder="Enter your Name"
-                          className="p-1 text-xs h-8"
                         />
                       </FormControl>
                       <FormMessage />
@@ -103,41 +76,18 @@ const UserForm = (props: UserFormProps) => {
                   )}
                 />
               </div>
-
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="mobile"
+                  name="contact"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mobile</FormLabel>
+                      <FormLabel>Contact number</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          type="text"
-                          placeholder="Enter your Mobile Number"
-                          className="p-1 text-xs h-8"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <FormField
-                  control={form.control}
-                  name="designation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Designation</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          placeholder="Enter your Designation"
-                          className="p-1 text-xs h-8"
+                          type="contact"
+                          placeholder="Enter Contact number"
                         />
                       </FormControl>
                       <FormMessage />
@@ -147,7 +97,21 @@ const UserForm = (props: UserFormProps) => {
               </div>
             </>
           )}
-
+          <div className="grid w-full max-w-sm items-center gap-1.5">
+            <FormField
+              control={form.control}
+              name="userEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter your Email" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <FormField
               control={form.control}
@@ -159,8 +123,7 @@ const UserForm = (props: UserFormProps) => {
                     <Input
                       {...field}
                       type="password"
-                      placeholder="Enter your Password"
-                      className="p-1 text-xs h-8"
+                      placeholder="Enter your Pasword"
                     />
                   </FormControl>
                   <FormMessage />
@@ -169,52 +132,34 @@ const UserForm = (props: UserFormProps) => {
             />
           </div>
 
-          {isSignup && (
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        placeholder="Confirm your Password"
-                        className="p-1 text-xs h-8"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
-
           <Button
+            isLoading={disableSubmit || isPending}
+            disabled={disableSubmit || isPending}
             type="submit"
-            className="bg-[#668D7E] hover:bg-[#668D7E] text-white w-full"
+            className="!bg-[#3F37C9] text-white w-full"
           >
             {isSignup ? "Sign Up" : "Sign In"}
           </Button>
         </form>
       </Form>
-
-      <div className="flex flex-col text-sm gap-1 justify-center items-center">
-        <Link
-          href={isSignup ? "/signin" : "/signup"}
-          className={cn(
-            buttonVariants({
-              variant: "link",
-              className: "text-[#668D7E] hover:text-[#668D7E] font-bold"
-            })
-          )}
-        >
-          {isSignup
-            ? "Already have an Account? Sign In"
-            : "Don't have an Account? Sign Up"}
-        </Link>
+      <div>
+        <div className="flex flex-col text-sm gap-1 justify-center items-center">
+          <Link
+            href={isSignup ? "/signin" : "/signup"}
+            aria-disabled={disableSubmit || isPending}
+            className={cn(
+              disableSubmit || isPending ? "pointer-events-none" : "",
+              buttonVariants({
+                variant: "link",
+                className: "font-bold",
+              })
+            )}
+          >
+            {isSignup
+              ? "Already have an account? Sign in"
+              : "Don't have an account? Sign up"}
+          </Link>
+        </div>
       </div>
     </div>
   );
