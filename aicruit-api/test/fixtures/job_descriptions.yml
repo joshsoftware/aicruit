@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  created_by: one
+  company: one
+  title: MyString
+  file_url: MyString
+  parsed_data: MyString
+  status: 1
+
+two:
+  created_by: two
+  company: two
+  title: MyString
+  file_url: MyString
+  parsed_data: MyString
+  status: 1
