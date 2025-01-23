@@ -20,7 +20,7 @@ import {
   signinUserSchema,
 } from "@/validators/register";
 
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/services/AuthUser/hooks";
 import Link from "next/link";
 
 interface UserFormProps {
@@ -35,8 +35,8 @@ const UserForm = (props: UserFormProps) => {
   const form = useForm<SignupUserRequest | SigninUserRequest>({
     resolver: zodResolver(isSignup ? signupUserSchema : signinUserSchema),
     defaultValues: isSignup
-      ? { password: "", userEmail: "", userName: "", contact: "" }
-      : { password: "", userEmail: "" },
+      ? { firstName: "", lastName: "", email: "", password: "" }
+      : { email: "", password: "" },
     mode: "all",
   });
 
@@ -60,15 +60,15 @@ const UserForm = (props: UserFormProps) => {
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="userName"
+                  name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>first name</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="text"
-                          placeholder="Enter your Name"
+                          placeholder="Enter first name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -79,15 +79,15 @@ const UserForm = (props: UserFormProps) => {
               <div className="grid w-full max-w-sm items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="contact"
+                  name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact number</FormLabel>
+                      <FormLabel>last name</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="contact"
-                          placeholder="Enter Contact number"
+                          placeholder="Enter last name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -100,12 +100,12 @@ const UserForm = (props: UserFormProps) => {
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <FormField
               control={form.control}
-              name="userEmail"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter your Email" />
+                    <Input {...field} placeholder="Enter your email" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +123,7 @@ const UserForm = (props: UserFormProps) => {
                     <Input
                       {...field}
                       type="password"
-                      placeholder="Enter your Pasword"
+                      placeholder="Enter your password"
                     />
                   </FormControl>
                   <FormMessage />

@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { buttonVariants } from "./ui/button";
 import Link from "next/link";
-import { User } from "lucia";
 import { ValidationMessage } from "@/constants/messages";
+import { BrowserRoute } from "@/constants/route";
 
-const Landing = (attr: { user: User | null }) => {
+const Landing = () => {
   return (
     <div className="flex flex-col md:flex-row w-full h-full justify-between gap-4 pt-16 px-8">
       <div className="w-full flex flex-col mt-24 gap-3 justify-center items-start">
@@ -21,7 +21,7 @@ const Landing = (attr: { user: User | null }) => {
         </p>
         <div className="w-full flex">
           <Link
-            href={attr?.user?.role == "hr" ? "/analysis" : "/signin"}
+            href={BrowserRoute.SignIn}
             className={buttonVariants({
               className: "bg-purple-dark text-white mt-2 px-2 py-0.5 text-lg",
             })}

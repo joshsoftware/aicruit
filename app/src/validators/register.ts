@@ -2,7 +2,13 @@ import { z } from "zod";
 import { ValidationMessage } from "../constants/messages";
 
 export const signupUserSchema = z.object({
-  userEmail: z.string().email({
+  firstName: z.string().min(2, {
+    message: ValidationMessage.NAME_MIN_LENGTH,
+  }),
+  lastName: z.string().min(2, {
+    message: ValidationMessage.NAME_MIN_LENGTH,
+  }),
+  email: z.string().email({
     message: ValidationMessage.INVALID_EMAIL,
   }),
   password: z
@@ -13,16 +19,10 @@ export const signupUserSchema = z.object({
     .max(16, {
       message: ValidationMessage.PASSWORD_MAX_LENGTH,
     }),
-  userName: z.string().min(2, {
-    message: ValidationMessage.NAME_MIN_LENGTH,
-  }),
-  contact: z.string().regex(/^\d{10}$/, {
-    message: ValidationMessage.CONTACT_FORMAT,
-  }),
 });
 
 export const signinUserSchema = z.object({
-  userEmail: z.string().email({
+  email: z.string().email({
     message: ValidationMessage.INVALID_EMAIL,
   }),
   password: z
