@@ -29,3 +29,27 @@
 
 en:
   hello: "Hello world"
+  exception:
+    authorized: 'You are not authorized to perform this action'
+    record_not_found: 'The token is invalid. No user was found with the provided token.'
+    token_not_found: 'The token is invalid or expired'
+  model:
+   create:
+    success: "%{model_name} Created Successfully"
+    failure: "Failed to create %{model_name}"
+   found:
+    success: "%{model_name} Retrieved Successfully"
+    failure: "%{model_name} not found"
+  update:
+    success: "%{model_name} Updated Successfully"
+    failure: "Failed to update %{model_name}"
+  delete:
+    success: "%{model_name} Deleted Successfully"
+    failure: "Failed to delete %{model_name}"
+  user:
+    login:
+      success: 'Welcome You logged in successfully'
+      failure: 'Failed to login'
+    errors:
+      not_found: 'User account does not exist'
+      invalid_password: 'Password is invalid please enter correct password'
