@@ -29,12 +29,14 @@ module JobDescriptionService
     end
 
     def create_job_description
-      merged_params = job_description_params.merge(user_id: current_user.id, company_id: current_user.company_id)
+      permitted_params = params.require(:job_description).permit(:title, :file_url, parsed_data: {})
+
+      merged_params = permitted_params.merge(user_id: current_user.id, company_id: current_user.company_id)
       @job_description = JobDescription.new(merged_params)
       @job_description.save!
     rescue ActiveRecord::RecordInvalid
       @message = I18n.t('model.create.failure', model_name: 'Job Description')
-      @errors = @medication.errors.full_messages
+      @errors = @job_description.errors.full_messages
       false
     else
       true
@@ -43,17 +45,6 @@ module JobDescriptionService
     def set_data
       @message = I18n.t('model.create.success', model_name: 'JobDescription')
       @data = JobDescriptionSerializer.new(@job_description)
-    end
-
-    def job_description_params
-      params.permit(
-        :title,
-        :file_url,
-        :parsed_data,
-        :status,
-        :user_id,
-        :company_id
-      )
     end
   end
 end

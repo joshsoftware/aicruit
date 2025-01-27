@@ -11,8 +11,9 @@ module JobDescriptionService
     end
 
     def call
-      return failure_response(message, errors) unless validate_user && set_job_descriptions
+      return failure_response(message, errors) unless validate_user
 
+      set_job_descriptions
       set_data
       success_response(message, data)
     end
@@ -29,16 +30,16 @@ module JobDescriptionService
 
     def set_job_descriptions
       @job_descriptions = JobDescription.where(company_id: current_user.company_id)
-      unless @job_descriptions.exists?
-        @message = I18n.t('model.found.failure', model_name: 'Job Description')
-        return false
-      end
-      true
     end
 
     def set_data
-      @message = I18n.t('model.found.success', model_name: 'Job Description')
-      @data = ActiveModelSerializers::SerializableResource.new(@job_descriptions, each_serializer: JobDescriptionSerializer)
+      if @job_descriptions.exists?
+        @message = I18n.t('model.found.success', model_name: 'Job Description')
+        @data = ActiveModelSerializers::SerializableResource.new(@job_descriptions, each_serializer: JobDescriptionSerializer)
+      else
+        @message = I18n.t('model.found.failure', model_name: 'Job Description')
+        @data = []
+      end
     end
   end
 end
