@@ -4,13 +4,13 @@ import conversation_diarization.jd_parser as jd_parser
 import re
 import pandas as pd
 from utils.constants import LLM, TEMPERATURE
-from utils.prompt import JD_INTERVIEW_ALIGNMENT_PROMPT, QNA_DIFFCULTY_LEVEL_RATING_FIND_PROMPT
+from utils.prompt import JD_INTERVIEW_ALIGNMENT_PROMPT, QNA_DIFFCULTY_LEVEL_RATING_FIND_PROMPT, PARSE_JD_PROMPT
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-def align_interview_with_job_description(job_description_link, interview_qna):
+def align_interview_with_job_description(job_description_link, interview_qna, core_technology):
     try:
         print(f"job_description_link: {job_description_link}")
         print(f"interview_qna: {interview_qna}")
@@ -33,8 +33,8 @@ def align_interview_with_job_description(job_description_link, interview_qna):
         
         if response_text_json:
             response_text_grouped = response_text_json.group()
-            
-        difficulty_level_ratings = get_question_level_ratings(Asked_Questions=questions_string)
+
+        difficulty_level_ratings = get_question_level_ratings(Asked_Questions=questions_string, core_technology=core_technology)
         print("\n\n Got difficulty_level_ratings : ",difficulty_level_ratings)
         
         if response_text_json:
@@ -123,10 +123,10 @@ def align_interview_with_job_description(job_description_link, interview_qna):
         print(f"Error in align_interview_with_job_description: {e}")
         return {"error": str(e)}
 
-def get_question_level_ratings(Asked_Questions):
+def get_question_level_ratings(Asked_Questions, core_technology):
   try:
     file_path = os.getenv('EXCEL_QUESTION_BANK_PATH')
-    sheet_name = "Java"
+    sheet_name = core_technology
     columns_to_fetch = ["Question", "Level"]
 
     questions_from_bank = fetch_columns_from_excel(file_path, sheet_name, columns_to_fetch)
@@ -180,3 +180,30 @@ def fetch_columns_from_excel(file_path, sheet_name, columns_to_fetch):
   
 def create_prompt(questionBank: str, asked_questions: str) -> str:
     return QNA_DIFFCULTY_LEVEL_RATING_FIND_PROMPT.replace("<QUESTIONS>", questionBank).replace("<ASKED_QUESTIONS>", asked_questions)
+
+def create_prompt_for_parse_jd(jd_contents: str) -> str:
+    return PARSE_JD_PROMPT.replace("<FILE_CONTENTS>", jd_contents)
+
+def parse_jd_from_llm(jd_contents: str):
+    try:
+        prompt = create_prompt_for_parse_jd(jd_contents)
+        response = ollama.chat(
+            model=LLM,
+            options={"temperature": TEMPERATURE},
+            messages=[{"role": "user", "content": prompt}],
+        )
+        response_text = response.get("message", {}).get("content", "")
+        response_text_json = re.search(r"\{.*\}", response_text, re.DOTALL)
+        
+        if response_text_json:
+            try:
+                response_text_json = json.loads(response_text_json.group())
+            except json.JSONDecodeError as e:
+                response_text_json = None
+        else:
+            response_text_json = None
+        
+        return response_text_json
+    except Exception as e:
+        print(f"Error in parse_jd: {e}")
+        return None
