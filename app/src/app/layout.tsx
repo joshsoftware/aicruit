@@ -3,7 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import TanstackQueryProvider from "@/providers/TanstackQueryProvider";
 import { secondaryFont } from "@/fonts";
-import Header from "@/components/Header";
+import Header from "@/components/header";
 
 export const metadata: Metadata = {
   title: "AiCruit",
