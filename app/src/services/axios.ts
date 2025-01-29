@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { RAILS_API_URL as API_URL } from "@/services/env";
+import { RAILS_API_URL as API_URL} from "@/services/env";
 import {
   networkErrorToast,
   technicalGlitchToast,

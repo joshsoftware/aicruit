@@ -3,7 +3,7 @@
 class Api::V1::JobDescriptionsController < ApplicationController
   def create
     authorize! :create, JobDescription
-    result = JobDescriptionService::Create.new(params[:job_description], current_user).call
+    result = JobDescriptionService::Create.new(params, current_user).call
 
     if result[:success]
       render json: result.to_h, status: :ok

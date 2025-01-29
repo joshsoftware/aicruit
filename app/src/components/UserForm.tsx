@@ -136,7 +136,7 @@ const UserForm = (props: UserFormProps) => {
             isLoading={disableSubmit || isPending}
             disabled={disableSubmit || isPending}
             type="submit"
-            className="!bg-[#3F37C9] text-white w-full"
+            className="!bg-purple-dark text-white w-full"
           >
             {isSignup ? "Sign Up" : "Sign In"}
           </Button>
