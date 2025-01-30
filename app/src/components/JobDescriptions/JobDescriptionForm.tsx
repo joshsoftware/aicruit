@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { jobDescriptionSchema } from "@/validators/job-description";
 import { MAX_FILE_SIZE_MB } from "@/constants/constants";
-import UploadedFile from "./UploadFile";
+import UploadedFile from "../UploadFile";
 import { toast } from "sonner";
 
 export interface JobDescriptionFormData {
@@ -56,7 +56,7 @@ function JobDescriptionForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div className="flex items-center justify-center">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md flex flex-col space-y-6">
         <h1 className="text-xl text-black-primary font-bold text-center">
           New Job Description

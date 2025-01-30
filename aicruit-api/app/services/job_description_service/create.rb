@@ -29,9 +29,16 @@ module JobDescriptionService
     end
 
     def create_job_description
-      permitted_params = params.require(:job_description).permit(:title, :file_url, parsed_data: {})
+      permitted_params = params.require(:job_description).permit(
+        :title,
+        parsed_data: {}
+      )
 
-      merged_params = permitted_params.merge(user_id: current_user.id, company_id: current_user.company_id)
+      merged_params = permitted_params.merge(
+        user_id: current_user.id,
+        company_id: current_user.company_id
+      )
+
       @job_description = JobDescription.new(merged_params)
       @job_description.save!
     rescue ActiveRecord::RecordInvalid
