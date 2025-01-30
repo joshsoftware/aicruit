@@ -5,7 +5,7 @@ import {
   technicalGlitchToast,
 } from "@/constants/toastmessages";
 import { toast } from "sonner";
-import { createAcceptHeaderValue } from "./utils";
+import { createAcceptHeaderValue } from "@/services/utils";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
