@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import TanstackQueryProvider from "@/providers/TanstackQueryProvider";
 import { secondaryFont } from "@/fonts";
-import Header from "@/components/header";
+import Header from "@/components/Home/header";
 
 import store from "@/redux/store";
 import { Provider } from "react-redux";

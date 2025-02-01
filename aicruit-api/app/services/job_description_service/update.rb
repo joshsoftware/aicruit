@@ -12,7 +12,6 @@ module JobDescriptionService
 
     def call
       return failure_response(message, errors) unless set_job_description
-
       return failure_response(message, errors) unless update_job_description
 
       set_data
@@ -45,7 +44,12 @@ module JobDescriptionService
     end
 
     def job_description_params
-      params.permit(:title, :file_url, :parsed_data, :status)
+      params.permit(
+        :title,
+        :file_url,
+        :status,
+        parsed_data: {}
+      )
     end
   end
 end

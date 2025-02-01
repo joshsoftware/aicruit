@@ -24,7 +24,7 @@ class Api::V1::JobDescriptionsController < ApplicationController
   end
 
   def update
-    authorize! :update, JobDescription
+    authorize! :update, JobDescription.find_by(id: params[:id])
     result = JobDescriptionService::Update.new(params[:id], params[:job_description]).call
     if result[:success]
       render json: result.to_h, status: :ok
@@ -34,7 +34,7 @@ class Api::V1::JobDescriptionsController < ApplicationController
   end
 
   def destroy
-    authorize! :destroy, JobDescription
+    authorize! :destroy, JobDescription.find_by(id: params[:id])
     result = JobDescriptionService::Destroy.new(params[:id]).call
     if result[:success]
       render json: result.to_h, status: :ok
@@ -44,8 +44,7 @@ class Api::V1::JobDescriptionsController < ApplicationController
   end
 
   def show
-    authorize! :read, JobDescription
-
+    authorize! :read, JobDescription.find_by(id: params[:id])
     result = JobDescriptionService::Show.new(params[:id]).call
     if result[:success]
       render json: result.to_h, status: :ok

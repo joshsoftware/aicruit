@@ -78,8 +78,6 @@ export interface PutJobDescriptionResponseData {
 
 export async function putJobDescription(payload: PutJobDescriptionVariables) {
   try {
-    console.log("PUT Request Payload:", payload);
-
     const { jobId, body } = payload;
     const response = await axiosInstance.put<PutJobDescriptionResponseData>(
       ApiRoute.JobDescriptions + `/${jobId}`,
@@ -91,7 +89,6 @@ export async function putJobDescription(payload: PutJobDescriptionVariables) {
       }
     );
 
-    console.log("PUT Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("PUT Request Error:", error);
@@ -119,14 +116,40 @@ export async function postJobDescription(
   variables: PostJobDescriptionVariables
 ) {
   const { title, parsed_data } = variables;
+
   const response = await axiosInstance.post<PostJobDescriptionResponseData>(
-    ApiRoute.SignUp,
+    ApiRoute.JobDescriptions,
     {
       job_description: {
         title,
         parsed_data,
       },
+    },
+    {
+      headers: {
+        Authorization: token,
+      },
     }
   );
+  return response.data;
+}
+
+export interface DeleteJobDescriptionResponseData {
+  success: boolean;
+  message: string;
+}
+
+export async function deleteJobDescription(
+  id: number
+): Promise<DeleteJobDescriptionResponseData> {
+  const response = await axiosInstance.delete<DeleteJobDescriptionResponseData>(
+    ApiRoute.JobDescriptions + `/${id}`,
+    {
+      headers: {
+        Authorization: token,
+      },
+    }
+  );
+
   return response.data;
 }

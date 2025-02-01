@@ -1,11 +1,14 @@
 import Image from "next/image";
 
-interface UploadedFileProps {
+interface DisplayUploadedFileProps {
   fileName: string;
   onDelete: () => void;
 }
 
-const UploadedFile: React.FC<UploadedFileProps> = ({ fileName, onDelete }) => {
+const DisplayUploadedFile: React.FC<DisplayUploadedFileProps> = ({
+  fileName,
+  onDelete,
+}) => {
   return (
     <div className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-lg mt-2 shadow-md">
       <Image height={25} width={25} src={"/file-icon.svg"} alt="file icon" />
@@ -22,4 +25,4 @@ const UploadedFile: React.FC<UploadedFileProps> = ({ fileName, onDelete }) => {
   );
 };
 
-export default UploadedFile;
+export default DisplayUploadedFile;

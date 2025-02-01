@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { RAILS_API_URL as API_URL} from "@/services/env";
+import { RAILS_API_URL as API_URL, PYTHON_API_URL } from "@/services/env";
 import {
   networkErrorToast,
   technicalGlitchToast,
@@ -14,7 +14,12 @@ const axiosInstance = axios.create({
   },
 });
 
+const pythonAxiosInstance = axios.create({
+  baseURL: PYTHON_API_URL,
+});
+
 export default axiosInstance;
+export { pythonAxiosInstance };
 
 export function handleErrorResponse<T extends { message: string }>(
   error: unknown

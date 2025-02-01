@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useDeleteJobDescription } from "@/services/JobDescription/hooks";
+import { ConfirmationModal } from "../ui/ConfirmationModal";
 
 interface JobDescription {
   id: number;
@@ -21,15 +23,32 @@ const statusColorMap: Record<string, string> = {
 
 export default function JobDescriptionTable({ jobDescriptions }: Props) {
   const router = useRouter();
+  const { isPending, sendDeleteJobDescriptionRequest } =
+    useDeleteJobDescription();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [jobIdToDelete, setJobIdToDelete] = useState<number | null>(null);
 
   const handleView = (id: number) => {
     router.push(`/job-description/${id}`);
-      console.log("intable", id);
   };
-  
 
-  const handleDelete = (id: number) => {
-    console.log("Delete JD with ID:", id);
+  const handleDeleteClick = (id: number) => {
+    setJobIdToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (jobIdToDelete !== null) {
+      sendDeleteJobDescriptionRequest(jobIdToDelete);
+      setIsModalOpen(false);
+      setJobIdToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsModalOpen(false);
+    setJobIdToDelete(null);
   };
 
   const getStatusClasses = (status: string) => {
@@ -72,18 +91,22 @@ export default function JobDescriptionTable({ jobDescriptions }: Props) {
               <td className="px-6 py-2 text-right text-sm">
                 <div className="flex justify-end space-x-4">
                   <Image
-                    height={17}
-                    width={22}
+                    height={23}
+                    width={23}
+                    className="cursor-pointer"
                     src="/view-icon.svg"
                     alt="view-icon"
                     onClick={() => handleView(jd.id)}
                   />
                   <Image
-                    height={27}
-                    width={20}
+                    height={23}
+                    width={23}
+                    className="cursor-pointer"
                     src="/trash.svg"
                     alt="delete-icon"
-                    onClick={() => handleDelete(jd.id)}
+                    onClick={
+                      !isPending ? () => handleDeleteClick(jd.id) : undefined
+                    }
                   />
                 </div>
               </td>
@@ -91,6 +114,16 @@ export default function JobDescriptionTable({ jobDescriptions }: Props) {
           ))}
         </tbody>
       </table>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this job description? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
