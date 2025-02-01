@@ -153,12 +153,15 @@ const JobDescriptionEditForm: React.FC<JobDescriptionEditFormProps> = ({
         },
       };
 
-      console.log("Submitting payload:", cleanedData);
-
-      modifyMutate({
-        jobId: jobDescription.id,
-        body: cleanedData,
-      });
+      modifyMutate(
+        {
+          jobId: jobDescription.id,
+          body: cleanedData,
+        },
+        {
+          onSuccess: onCancel,
+        }
+      );
     } catch (error) {
       console.error("Error submitting form:", error);
     }
