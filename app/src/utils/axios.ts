@@ -1,11 +1,11 @@
 import axios, { AxiosError } from "axios";
-import { RAILS_API_URL as API_URL} from "@/services/env";
+import { RAILS_API_URL as API_URL, PYTHON_API_URL } from "@/services/env";
 import {
   networkErrorToast,
   technicalGlitchToast,
 } from "@/constants/toastmessages";
 import { toast } from "sonner";
-import { createAcceptHeaderValue } from "./utils";
+import { createAcceptHeaderValue } from "@/services/utils";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -14,7 +14,12 @@ const axiosInstance = axios.create({
   },
 });
 
+const pythonAxiosInstance = axios.create({
+  baseURL: PYTHON_API_URL,
+});
+
 export default axiosInstance;
+export { pythonAxiosInstance };
 
 export function handleErrorResponse<T extends { message: string }>(
   error: unknown

@@ -40,10 +40,10 @@ en:
    found:
     success: "%{model_name} Retrieved Successfully"
     failure: "%{model_name} not found"
-  update:
+   update:
     success: "%{model_name} Updated Successfully"
     failure: "Failed to update %{model_name}"
-  delete:
+   delete:
     success: "%{model_name} Deleted Successfully"
     failure: "Failed to delete %{model_name}"
   user:

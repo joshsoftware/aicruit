@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       member do
         put :update
         delete :destroy
+        get :show
      end
     end
   end

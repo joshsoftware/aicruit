@@ -1,11 +1,16 @@
+"use client";
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import TanstackQueryProvider from "@/providers/TanstackQueryProvider";
 import { secondaryFont } from "@/fonts";
-import Header from "@/components/header";
+import Header from "@/components/Home/header";
 
-export const metadata: Metadata = {
+import store from "@/redux/store";
+import { Provider } from "react-redux";
+
+const metadata: Metadata = {
   title: "AiCruit",
 };
 
@@ -20,13 +25,15 @@ export default async function RootLayout({
       <body
         className={`flex flex-col overflow-y-auto ${secondaryFont.className}`}
       >
-        <TanstackQueryProvider>
-          <Header />
-          <section className="flex-1 overflow-y-auto">
-            <div className="container h-full">{children}</div>
-          </section>
-          <Toaster richColors closeButton />
-        </TanstackQueryProvider>
+        <Provider store={store}>
+          <TanstackQueryProvider>
+            <Header />
+            <section className="flex-1 overflow-y-auto">
+              <div className="container h-full">{children}</div>
+            </section>
+            <Toaster richColors closeButton />
+          </TanstackQueryProvider>
+        </Provider>
       </body>
     </html>
   );
