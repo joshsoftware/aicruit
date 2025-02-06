@@ -1,5 +1,5 @@
 import { ApiRoute } from "@/constants/route";
-import { token } from "@/utils/authData";
+import store from "@/redux/store";
 import axiosInstance from "@/utils/axios";
 
 export interface ParsedData {
@@ -26,6 +26,8 @@ export interface GetJobDescriptionsResponse {
 }
 
 export async function getJobDescriptions(): Promise<GetJobDescriptionsResponse> {
+  const state = store.getState();
+  const token = state.auth.token;
   const response = await axiosInstance.get<GetJobDescriptionsResponse>(
     ApiRoute.JobDescriptions,
     {
@@ -45,6 +47,8 @@ export interface GetJobDescriptionDetailsResponse {
 export async function getJobDescriptionDetails(
   id: number
 ): Promise<GetJobDescriptionDetailsResponse> {
+  const state = store.getState();
+  const token = state.auth.token;
   const response = await axiosInstance.get<GetJobDescriptionDetailsResponse>(
     ApiRoute.JobDescriptions + `/${id}`,
     {
@@ -77,6 +81,8 @@ export interface PutJobDescriptionResponseData {
 }
 
 export async function putJobDescription(payload: PutJobDescriptionVariables) {
+  const state = store.getState();
+  const token = state.auth.token;
   try {
     const { jobId, body } = payload;
     const response = await axiosInstance.put<PutJobDescriptionResponseData>(
@@ -115,6 +121,8 @@ export interface PostJobDescriptionResponseData {
 export async function postJobDescription(
   variables: PostJobDescriptionVariables
 ) {
+  const state = store.getState();
+  const token = state.auth.token;
   const { title, parsed_data } = variables;
 
   const response = await axiosInstance.post<PostJobDescriptionResponseData>(
@@ -142,6 +150,8 @@ export interface DeleteJobDescriptionResponseData {
 export async function deleteJobDescription(
   id: number
 ): Promise<DeleteJobDescriptionResponseData> {
+  const state = store.getState();
+  const token = state.auth.token;
   const response = await axiosInstance.delete<DeleteJobDescriptionResponseData>(
     ApiRoute.JobDescriptions + `/${id}`,
     {
