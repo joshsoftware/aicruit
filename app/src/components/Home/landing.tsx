@@ -1,10 +1,10 @@
 import { primaryFont, secondaryFont } from "@/fonts";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { buttonVariants } from "./ui/button";
 import Link from "next/link";
 import { ValidationMessage } from "@/constants/messages";
 import { BrowserRoute } from "@/constants/route";
+import { buttonVariants } from "@/components/ui/button";
 
 const Landing = () => {
   return (
