@@ -1,5 +1,3 @@
-"use client";
-
 import JobDescriptionForm from "@/components/JobDescriptions/JobDescriptionForm";
 import NavigateBack from "@/components/NavigateBack";
 
