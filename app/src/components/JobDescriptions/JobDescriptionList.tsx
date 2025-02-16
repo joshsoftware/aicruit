@@ -77,41 +77,51 @@ export default function JobDescriptionTable({ jobDescriptions }: Props) {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {jobDescriptions.map((jd: JobDescription) => (
-            <tr key={jd.id} className="hover:bg-gray-50">
-              <td className="px-6 py-2 text-sm text-black-tertiary">
-                #{jd.id}
-              </td>
-              <td className="px-6 py-2 text-sm text-black-tertiary">
-                {jd.title}
-              </td>
-              <td className="px-6 py-2 text-sm text-black-tertiary">
-                <span className={getStatusClasses(jd.status)}>{jd.status}</span>
-              </td>
-              <td className="px-6 py-2 text-right text-sm">
-                <div className="flex justify-end space-x-4">
-                  <Image
-                    height={23}
-                    width={23}
-                    className="cursor-pointer"
-                    src="/view-icon.svg"
-                    alt="view-icon"
-                    onClick={() => handleView(jd.id)}
-                  />
-                  <Image
-                    height={23}
-                    width={23}
-                    className="cursor-pointer"
-                    src="/trash.svg"
-                    alt="delete-icon"
-                    onClick={
-                      !isPending ? () => handleDeleteClick(jd.id) : undefined
-                    }
-                  />
-                </div>
+          {jobDescriptions.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                No job descriptions found
               </td>
             </tr>
-          ))}
+          ) : (
+            jobDescriptions.map((jd: JobDescription) => (
+              <tr key={jd.id} className="hover:bg-gray-50">
+                <td className="px-6 py-2 text-sm text-black-tertiary">
+                  #{jd.id}
+                </td>
+                <td className="px-6 py-2 text-sm text-black-tertiary">
+                  {jd.title}
+                </td>
+                <td className="px-6 py-2 text-sm text-black-tertiary">
+                  <span className={getStatusClasses(jd.status)}>
+                    {jd.status}
+                  </span>
+                </td>
+                <td className="px-6 py-2 text-right text-sm">
+                  <div className="flex justify-end space-x-4">
+                    <Image
+                      height={23}
+                      width={23}
+                      className="cursor-pointer"
+                      src="/view-icon.svg"
+                      alt="view-icon"
+                      onClick={() => handleView(jd.id)}
+                    />
+                    <Image
+                      height={23}
+                      width={23}
+                      className="cursor-pointer"
+                      src="/trash.svg"
+                      alt="delete-icon"
+                      onClick={
+                        !isPending ? () => handleDeleteClick(jd.id) : undefined
+                      }
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 

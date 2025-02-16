@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::API
   include ActionController::Serialization
 
+  before_action :set_current_tenant
+
   before_action :authenticate!
 
   rescue_from CanCan::AccessDenied do |exception|
@@ -24,9 +26,25 @@ class ApplicationController < ActionController::API
     end
   end
 
+  def set_current_tenant
+    subdomain = request.subdomains.first
+    return unless subdomain.present?
+
+    @current_company = Company.find_by(subdomain: subdomain)
+    if @current_company
+      ActsAsTenant.current_tenant = @current_company
+    else
+      redirect_to root_url(subdomain: nil), alert: 'Invalid subdomain'
+    end
+  end
+
+   def current_tenant
+    @current_company
+   end
+
   def current_user
     if @jwt_payload
-      @current_user ||= User.find_by_id(@jwt_payload["user_id"]) if @jwt_payload.has_key?('user_id')
+      @current_user ||= User.find_by_id(@jwt_payload['user_id']) if @jwt_payload.has_key?('user_id')
     end
     @current_user
   end

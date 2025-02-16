@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, ChangeEvent } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { useParseJobDescription } from "@/services/JobDescription/hooks";

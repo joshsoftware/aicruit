@@ -30,12 +30,47 @@ module JobDescriptionService
     end
 
     def update_job_description
-      unless job_description.update(job_description_params)
-        @message = I18n.t('model.update.failure', model_name: 'Job description')
-        @errors = job_description.errors.full_messages
-        return false
+      ActiveRecord::Base.transaction do
+        return false if params[:status].present? && !handle_status_transition
+
+        unless job_description.update(job_description_params)
+          @message = I18n.t('model.update.failure', model_name: 'Job description')
+          @errors = job_description.errors.full_messages
+          return false
+        end
       end
       true
+    end
+
+    def handle_status_transition
+      case params[:status]
+      when 'published'
+        return false unless publish_job
+      when 'closed'
+        return false unless close_job
+      end
+      true
+    end
+
+    def publish_job
+      if job_description.may_publish?
+        job_description.publish!
+        job_description.update!(published_at: Time.current)
+        true
+      else
+        @message = 'Job cannot be published from the current state.'
+        false
+      end
+    end
+
+    def close_job
+      if job_description.may_close?
+        job_description.close!
+        true
+      else
+        @message = 'Job cannot be closed from the current state.'
+        false
+      end
     end
 
     def set_data
