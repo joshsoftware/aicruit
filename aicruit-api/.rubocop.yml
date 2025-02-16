@@ -9,7 +9,6 @@ AllCops:
     - "config/*.rb"
     - "vendor/**/**"
     - "db/schema.rb"
-    - "app/channels/application_cable/channel.rb"
     - "app/controllers/application_controller.rb"
     - "app/jobs/application_job.rb"
     - "app/mailers/application_mailer.rb"
@@ -17,15 +16,12 @@ AllCops:
     - "config/environments/development.rb"
     - "config/environments/production.rb"
     - "config/environments/test.rb"
-    - "config/initializers/cors.rb"
     - "config/initializers/inflections.rb"
     - "db/seeds.rb"
     - "spec/rails_helper.rb"
     - "spec/spec_helper.rb"
     - "test/channels/application_cable/connection_test.rb"
     - "test/test_helper.rb"
-    - "app/channels/application_cable/connection.rb"
-
 Style/Documentation:
   Enabled: false
 Metrics/BlockLength:

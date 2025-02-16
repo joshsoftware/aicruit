@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_01_24_172553) do
+ActiveRecord::Schema[7.2].define(version: 2025_02_13_094601) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -21,6 +21,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_24_172553) do
     t.string "contact_number"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "subdomain"
+    t.index ["subdomain"], name: "index_companies_on_subdomain", unique: true
   end
 
   create_table "job_descriptions", force: :cascade do |t|
@@ -32,6 +34,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_24_172553) do
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "published_at"
     t.index ["company_id"], name: "index_job_descriptions_on_company_id"
     t.index ["user_id"], name: "index_job_descriptions_on_user_id"
   end

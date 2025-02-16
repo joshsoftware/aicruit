@@ -78,3 +78,7 @@ gem 'rubocop', '~> 1.63'
 gem 'rubocop-rails', '~> 2.24'
 
 gem 'versionist'
+
+gem 'acts_as_tenant'
+
+gem 'aasm'
