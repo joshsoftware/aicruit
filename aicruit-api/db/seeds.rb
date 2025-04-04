@@ -5,7 +5,8 @@ company = Company.find_or_create_by!(
   name: 'Josh Software Private Limited',
   website: 'www.joshsoftware.com',
   contact_email: 'contact@joshsoftware.com',
-  contact_number: '+91 1234567890'
+  contact_number: '+91 1234567890',
+  subdomain: 'joshsoftware'
 )
 
 # Create Roles: Super Admin | Company Admin | HR Admin | HR
@@ -21,7 +22,7 @@ users_data = [
   { first_name: 'superadmin', last_name: 'one', email: 'superadmin.one@gmail.com', password: 'Superadmin@12345', role_name: 'Super Admin' },
   { first_name: 'superadmin', last_name: 'two', email: 'superadmin.two@gmail.com', password: 'Superadmin@12345', role_name: 'Super Admin' },
   { first_name: 'companyadmin', last_name: 'one', email: 'companyadmin.one@gmail.com', password: 'Companyadmin@12345', role_name: 'Company Admin' },
-  { first_name: 'companyadmin', last_name: 'two', email: 'companyadmin.two@gmail.com', password: 'Companyadmin@12345', role_name: 'Company Admin' },
+  { first_name: 'companyadmin', last_name: 'two', email: 'companyadmin.two@gmail.com', password: 'Companyadmi n@12345', role_name: 'Company Admin'},
   { first_name: 'hradmin', last_name: 'one', email: 'hradmin.one@gmail.com', password: 'Hradmin@12345', role_name: 'HR Admin' },
   { first_name: 'hradmin', last_name: 'two', email: 'hradmin.two@gmail.com', password: 'Hradmin@12345', role_name: 'HR Admin' },
   { first_name: 'hr', last_name: 'one', email: 'hr.one@gmail.com', password: 'Hr@12345', role_name: 'HR' },

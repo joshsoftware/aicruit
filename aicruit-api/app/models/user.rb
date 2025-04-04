@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  acts_as_tenant(:company)
+
   has_secure_password
+
   belongs_to :company
   belongs_to :role
   has_many :job_descriptions
 
   validates :first_name, :last_name, presence: true, length: { maximum: 150 }
-  validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email, presence: true, uniqueness: { scope: :company_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
+
   validates :password, format: { with: PASSWORD_REGEX }, length: { minimum: 8 }, allow_blank: true
 
   after_initialize :set_default_role, if: :new_record?
