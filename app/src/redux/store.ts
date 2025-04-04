@@ -22,7 +22,6 @@ const store = configureStore({
   },
 });
 
-// Subscribe to store changes and persist state
 store.subscribe(() => {
   try {
     const state = store.getState().auth;

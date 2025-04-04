@@ -12,6 +12,10 @@ class Ability
     can :manage, :all
   end
 
+  def candidate
+    can :read, JobDescription, status: 'published'
+  end
+
   def hr_admin
     can :manage, JobDescription
   end

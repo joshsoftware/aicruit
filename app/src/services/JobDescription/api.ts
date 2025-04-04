@@ -3,13 +3,7 @@ import store from "@/redux/store";
 import axiosInstance from "@/utils/axios";
 
 export interface ParsedData {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | Record<string, any>
-    | undefined;
+  [key: string]: string | number | boolean | string[] | ParsedData;
 }
 
 export interface JobDescription {
@@ -17,11 +11,24 @@ export interface JobDescription {
   title: string;
   parsed_data: ParsedData;
   status: string;
+  published_at?: string;
+}
+export interface publishedJobDescription {
+  id: string;
+  title: string;
+  parsed_data: ParsedData;
+  status: string;
+  published_at: string;
 }
 
 export interface GetJobDescriptionsResponse {
   success: boolean;
   data: JobDescription[];
+  message: string;
+}
+export interface GetPublishedJobDescriptionsResponse {
+  success: boolean;
+  data: publishedJobDescription[];
   message: string;
 }
 
@@ -35,6 +42,13 @@ export async function getJobDescriptions(): Promise<GetJobDescriptionsResponse> 
     }
   );
 
+  return response.data;
+}
+
+export async function getPublishedJobDescriptions(): Promise<GetPublishedJobDescriptionsResponse> {
+  const response = await axiosInstance.get<GetPublishedJobDescriptionsResponse>(
+    ApiRoute.PublishedJobDescriptions
+  );
   return response.data;
 }
 

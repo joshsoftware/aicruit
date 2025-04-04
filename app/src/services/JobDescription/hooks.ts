@@ -3,6 +3,7 @@ import {
   deleteJobDescription,
   getJobDescriptionDetails,
   getJobDescriptions,
+  getPublishedJobDescriptions,
   postJobDescription,
   PostJobDescriptionVariables,
   putJobDescription,
@@ -14,13 +15,34 @@ import { useState } from "react";
 import { ApiRoute } from "@/constants/route";
 
 export function useGetJobDescriptions() {
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data: jobDescriptionsData,
+    isLoading: isLoadingJobDescriptions,
+    isError: isErrorJobDescriptions,
+  } = useQuery({
     queryKey: ["get-job-descriptions"],
     queryFn: getJobDescriptions,
   });
 
+  const {
+    data: publishedJobDescriptionsData,
+    isLoading: isLoadingPublishedJobDescriptions,
+    isError: isErrorPublishedJobDescriptions,
+  } = useQuery({
+    queryKey: ["get-published-jobdescriptions"],
+    queryFn: getPublishedJobDescriptions,
+  });
+
+  const jobDescriptions = jobDescriptionsData?.data || [];
+  const publishedJobDescriptions = publishedJobDescriptionsData?.data || [];
+
+  const isLoading =
+    isLoadingJobDescriptions || isLoadingPublishedJobDescriptions;
+  const isError = isErrorJobDescriptions || isErrorPublishedJobDescriptions;
+
   return {
-    jobDescriptions: data?.data || [],
+    jobDescriptions,
+    publishedJobDescriptions,
     isLoading,
     isError,
   };

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::JobDescriptionsController < ApplicationController
+  skip_before_action :authenticate!, only: %i[published]
+
   def create
     authorize! :create, JobDescription
     result = JobDescriptionService::Create.new(params, current_user).call
@@ -46,6 +48,16 @@ class Api::V1::JobDescriptionsController < ApplicationController
   def show
     authorize! :read, JobDescription.find_by(id: params[:id])
     result = JobDescriptionService::Show.new(params[:id]).call
+    if result[:success]
+      render json: result.to_h, status: :ok
+    else
+      render json: result.to_h, status: :unprocessable_entity
+    end
+  end
+
+  def published
+    authorize! :read, JobDescription
+    result = JobDescriptionService::PublishedJobDescriptions.new.call
     if result[:success]
       render json: result.to_h, status: :ok
     else

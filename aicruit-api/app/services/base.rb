@@ -42,4 +42,16 @@ class Base
   rescue JWT::DecodeError
     false
   end
+
+  def generate_secure_password
+    special_chars = "!@\#$%^&*()-_=+[]{}|;:,.<>?/"
+    password = [
+      ('a'..'z').to_a.sample,
+      ('A'..'Z').to_a.sample,
+      ('0'..'9').to_a.sample,
+      special_chars.chars.sample
+    ].shuffle.join + SecureRandom.base64(6).tr('+/=', special_chars.chars.sample)
+
+    password.length < 8 ? "#{password}Aa1!" : password
+  end
 end
