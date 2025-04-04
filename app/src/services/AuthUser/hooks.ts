@@ -38,7 +38,7 @@ export const useUser = () => {
     onSuccess: async (res) => {
       const responseData = res.data;
 
-      const transformedUserData = {
+      const userData = {
         id: responseData.user.id,
         firstName: responseData.user.first_name,
         lastName: responseData.user.last_name,
@@ -50,18 +50,19 @@ export const useUser = () => {
 
       LocalStorage.setItem(
         LocalStorage.AUTH_USER_DATA,
-        JSON.stringify({ token: responseData.token, user: transformedUserData })
+        JSON.stringify({ token: responseData.token, user: userData })
       );
 
       dispatch(
         loadAuth({
           token: responseData.token,
-          user: transformedUserData,
+          user: userData,
         })
       );
 
       toast.success(ValidationMessage.SIGNIN_SUCCESS);
       // User role based navigation
+      
       const userRole = res?.data?.user.role_name;
       router.push(UserRoutes[userRole]);
     },

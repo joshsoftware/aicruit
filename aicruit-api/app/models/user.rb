@@ -8,6 +8,7 @@ class User < ApplicationRecord
   belongs_to :company
   belongs_to :role
   has_many :job_descriptions
+  has_many :resumes
 
   validates :first_name, :last_name, presence: true, length: { maximum: 150 }
   validates :email, presence: true, uniqueness: { scope: :company_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
@@ -32,9 +33,13 @@ class User < ApplicationRecord
     role.name == 'HR'
   end
 
+  def candidate?
+    role.name == 'Candidate'
+  end
+
   private
 
   def set_default_role
-    self.role ||= Role.find_by(name: 'HR')
+    self.role ||= Role.find_by(name: 'Candidate')
   end
 end
