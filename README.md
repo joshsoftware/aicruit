@@ -2,6 +2,26 @@
 
 AiCruit is a full-stack AI-powered recruitment platform that streamlines the hiring process.
 
+## 🔍 Resources
+
+### 🎨 Design Assets
+- **Figma Designs:**
+  - [AiCruit Main Design](https://www.figma.com/design/TMjjmxjpVtbOTnZvFZdzO7/AiCruit?node-id=0-1&p=f&t=Ro3CL4MWRQEiF7kv-0)
+  - [LingoAI Design 1](https://www.figma.com/design/rGku8Uu4q0KwcyLHMZiOYw/LingoAI?node-id=144-82&p=f&t=6TNPnMAbMGzySF3v-0)
+  - [LingoAI Design 2](https://www.figma.com/design/rGku8Uu4q0KwcyLHMZiOYw/LingoAI?node-id=16-514&t=r7fvskv3amxpcLyj-0)
+
+### 🗄️ Database diagram
+- [Database Diagram](https://dbdiagram.io/d/Aicruit-67b41ba1263d6cf9a084158b)
+
+### 📚 Technical References
+- [Rails Multi-tenancy Guide](https://medium.com/@rohandhalpe05/rails-multi-tenancy-explained-actsastenant-for-shared-database-saas-apps-80889d980d10)
+
+## 📚 Additional Resources
+
+- [Ruby on Rails Documentation](https://guides.rubyonrails.org/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+
 ## Tech Stack
 
 - **Backend**: Ruby on Rails (API-only)
