@@ -45,6 +45,12 @@ aicruit/
 └── service         # Python-based microservices
 ```
 
+### 🔧 Development Branch
+
+Please use the `dev` branch for all development work.  
+Make sure to branch off from `dev` and open pull requests **into `dev`**.
+
+
 ## Backend Setup (Rails)
 
 ### Requirements
