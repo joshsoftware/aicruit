@@ -6,15 +6,13 @@ import { Toaster } from "@/components/ui/sonner";
 import TanstackQueryProvider from "@/providers/TanstackQueryProvider";
 import { secondaryFont } from "@/fonts";
 import Header from "@/components/Home/header";
-
-import store from "@/redux/store";
-import { Provider } from "react-redux";
+import StoreProvider from "@/providers/storeProvider";
 
 const metadata: Metadata = {
   title: "AiCruit",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -25,7 +23,7 @@ export default async function RootLayout({
       <body
         className={`flex flex-col overflow-y-auto ${secondaryFont.className}`}
       >
-        <Provider store={store}>
+        <StoreProvider>
           <TanstackQueryProvider>
             <Header />
             <section className="flex-1 overflow-y-auto">
@@ -33,7 +31,7 @@ export default async function RootLayout({
             </section>
             <Toaster richColors closeButton />
           </TanstackQueryProvider>
-        </Provider>
+        </StoreProvider>
       </body>
     </html>
   );

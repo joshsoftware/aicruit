@@ -1,20 +1,26 @@
 class LocalStorage {
   static AUTH_USER_DATA = "auth_user_data";
 
-  static setItem(key: string, value: string) {
-    return localStorage.setItem(key, value);
+  private static isBrowserSide(): boolean {
+    return typeof window !== "undefined";
   }
 
-  static getItem(key: string) {
-    return localStorage.getItem(key);
+  static getItem(key: string): string | null {
+    return LocalStorage.isBrowserSide()
+      ? window.localStorage.getItem(key)
+      : null;
   }
 
-  static removeItem(key: string) {
-    return localStorage.removeItem(key);
+  static setItem(key: string, value: string): void {
+    if (LocalStorage.isBrowserSide()) {
+      window.localStorage.setItem(key, value);
+    }
   }
 
-  static removeAll() {
-    return localStorage.clear();
+  static removeItem(key: string): void {
+    if (LocalStorage.isBrowserSide()) {
+      window.localStorage.removeItem(key);
+    }
   }
 }
 

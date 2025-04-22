@@ -1,5 +1,5 @@
 import { ApiRoute } from "@/constants/route";
-import store from "@/redux/store";
+import { store } from "@/redux/store";
 import axiosInstance from "@/utils/axios";
 
 export interface ParsedData {

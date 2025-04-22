@@ -1,12 +1,25 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { BrowserRoute } from "@/constants/route";
 import { primaryFont } from "@/fonts";
+import useAuthUser from "@/hooks/useAuthUser";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "../ui/button";
+import { logout } from "@/utils/helpers";
 
 const Header = () => {
+  const router = useRouter();
+  const user = useAuthUser();
+
+  const handleLogoutClick = () => {
+    logout();
+    router.push("/");
+    router.refresh();
+  };
+
   return (
     <header
       className={cn(
@@ -27,6 +40,7 @@ const Header = () => {
             alt="Josh Logo"
           />
         </div>
+        {user && <Button onClick={handleLogoutClick}>Logout</Button>}
       </div>
     </header>
   );
