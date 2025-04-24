@@ -10,7 +10,7 @@ import { BrowserRoute } from "@/constants/route";
 import { postSignIn, postSignUp } from "./api";
 import { UserRoutes } from "@/constants/constants";
 import { handleErrorResponse } from "@/utils/axios";
-import LocalStorage from "@/utils/localStore";
+import Cookies from "@/utils/cookies";
 import { loadAuth } from "@/redux/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
 
@@ -48,8 +48,8 @@ export const useUser = () => {
         roleName: responseData.user.role_name,
       };
 
-      LocalStorage.setItem(
-        LocalStorage.AUTH_USER_DATA,
+      Cookies.setItem(
+        Cookies.AUTH_USER_DATA,
         JSON.stringify({ token: responseData.token, user: userData })
       );
 

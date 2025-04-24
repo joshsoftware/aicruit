@@ -5,16 +5,32 @@ import { primaryFont } from "@/fonts";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "../ui/button";
+import Cookies from "@/utils/cookies";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import store from "@/redux/store";
+import { resetAuth } from "@/redux/authSlice";
+import useAuthUser from "@/hooks/useAuthUser";
 
 const Header = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    Cookies.deleteItem(Cookies.AUTH_USER_DATA);
+    router.push("/");
+    dispatch(resetAuth());
+  };
+  const user = useAuthUser();
+
   return (
     <header
       className={cn(
-        "flex justify-between items-center bg-[#F4F3FF] sticky top-0",
+        "flex justify-center items-center bg-[#F4F3FF] sticky top-0",
         primaryFont.className
       )}
     >
-      <div className="container flex items-center justify-between py-3 ml-8 relative">
+      <div className="container flex items-center justify-between py-3 relative">
         <Link href={BrowserRoute.Home} className="text-4xl text-black">
           AiCruit
         </Link>
@@ -27,6 +43,7 @@ const Header = () => {
             alt="Josh Logo"
           />
         </div>
+        {user && <Button onClick={handleLogout}>Logout</Button>}
       </div>
     </header>
   );

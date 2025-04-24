@@ -1,5 +1,5 @@
 import { ApiRoute } from "@/constants/route";
-import axiosInstance from "@/services/axios";
+import axiosInstance from "@/utils/axios";
 
 export interface PostSignInVariables {
   email: string;
@@ -45,7 +45,7 @@ export interface PostSignUpResponseData {
   success: true;
   data: {
     token: string;
-    doctor: {
+    user: {
       id: number;
       full_name: string;
       last_name: string;
