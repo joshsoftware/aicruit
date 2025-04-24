@@ -4,7 +4,7 @@ export enum UserRoles {
   SUPER_ADMIN = "Super Admin",
   HR_ADMIN = "HR Admin",
   HR = "HR",
-  CANDIDATE="Candidate",
+  CANDIDATE = "Candidate",
   DEFAULT = "/",
 }
 
@@ -14,3 +14,5 @@ export const UserRoutes: Record<string, string> = {
   [UserRoles.CANDIDATE]: "/published-job-descriptions",
   DEFAULT: "/",
 };
+
+export const PUBLIC_ROUTES = ["/", "/signin", "/signup"];

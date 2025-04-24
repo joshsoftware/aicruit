@@ -1,5 +1,5 @@
 import { UserAuthData } from "@/redux/authSlice/types";
-import LocalStorage from "./localStore";
+import Cookies from "./cookies";
 
 interface AuthData {
   token: string;
@@ -11,13 +11,13 @@ export function getAuthData(): AuthData {
     return { token: "", user: null };
   }
 
-  const authString = LocalStorage.getItem(LocalStorage.AUTH_USER_DATA);
+  const authString = Cookies.getItem(Cookies.AUTH_USER_DATA);
   if (!authString) {
     return { token: "", user: null };
   }
 
   try {
-    const authData = JSON.parse(authString) as {
+    const authData = JSON.parse(authString as string) as {
       token: string;
       user: UserAuthData;
     };
