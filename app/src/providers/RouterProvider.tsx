@@ -6,12 +6,12 @@ import Cookies from "@/utils/cookies";
 const RouterProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [authorized, setAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
       if (PUBLIC_ROUTES.includes(pathname)) {
-        setAuthorized(true);
+        setIsAuthorized(true);
         return;
       }
 
@@ -25,7 +25,7 @@ const RouterProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const userData = JSON.parse(data as string);
         if (userData.token) {
-          setAuthorized(true);
+          setIsAuthorized(true);
         } else {
           router.push("/");
         }
@@ -38,7 +38,7 @@ const RouterProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, [pathname, router]);
 
-  if (!authorized && !PUBLIC_ROUTES.includes(pathname)) return null;
+  if (!isAuthorized && !PUBLIC_ROUTES.includes(pathname)) return null;
 
   return <div>{children}</div>;
 };
