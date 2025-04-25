@@ -8,11 +8,11 @@ import { useState } from "react";
 import { ValidationMessage } from "@/constants/messages";
 import { BrowserRoute } from "@/constants/route";
 import { postSignIn, postSignUp } from "./api";
-import { UserRoutes } from "@/constants/constants";
+import { AUTH_USER_DATA, UserRoutes } from "@/constants/constants";
 import { handleErrorResponse } from "@/utils/axios";
-import Cookies from "@/utils/cookies";
 import { loadAuth } from "@/redux/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
+import { storeCookie } from "@/utils/cookies";
 
 export const useUser = () => {
   const router = useRouter();
@@ -47,11 +47,6 @@ export const useUser = () => {
         comapanyId: responseData.user.company_id,
         roleName: responseData.user.role_name,
       };
-
-      Cookies.setItem(
-        Cookies.AUTH_USER_DATA,
-        JSON.stringify({ token: responseData.token, user: userData })
-      );
 
       dispatch(
         loadAuth({

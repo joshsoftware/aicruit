@@ -1,11 +1,6 @@
 import NavigateBack from "@/components/NavigateBack";
 import UserForm from "@/components/UserForm";
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
-
-
 export default async function Page() {
 	return (
         <div className="flex flex-col w-full pt-8">

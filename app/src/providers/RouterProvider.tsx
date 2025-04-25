@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { PUBLIC_ROUTES } from "@/constants/constants";
-import Cookies from "@/utils/cookies";
+import { AUTH_USER_DATA, PUBLIC_ROUTES } from "@/constants/constants";
+import { clearCookie, fetchCookie } from "@/utils/cookies";
 
 const RouterProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -11,11 +11,12 @@ const RouterProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = () => {
       if (PUBLIC_ROUTES.includes(pathname)) {
+        clearCookie(AUTH_USER_DATA);
         setIsAuthorized(true);
         return;
       }
 
-      const data = Cookies.getItem(Cookies.AUTH_USER_DATA);
+      const data = fetchCookie(AUTH_USER_DATA);
 
       if (!data) {
         router.push("/");

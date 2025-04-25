@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "./types";
 import { loadAuthReducer, resetAuthReducer } from "./reducers";
-import Cookies from "@/utils/cookies";
+import { fetchCookie } from "@/utils/cookies";
+import { AUTH_USER_DATA } from "@/constants/constants";
 
 const loadInitialState = (): AuthState => {
   try {
-    const storedAuth = Cookies.getItem(Cookies.AUTH_USER_DATA);
+    const storedAuth = fetchCookie(AUTH_USER_DATA);
     return storedAuth
       ? JSON.parse(storedAuth as string)
       : { token: null, user: null };
