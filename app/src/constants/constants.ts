@@ -17,4 +17,4 @@ export const UserRoutes: Record<string, string> = {
 
 export const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
-export const AUTH_USER_DATA = "auth_user_data";
+export const AUTH_USER_COOKIE = "auth_user_data";

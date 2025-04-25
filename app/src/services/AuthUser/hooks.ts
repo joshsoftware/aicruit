@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ValidationMessage } from "@/constants/messages";
 import { BrowserRoute } from "@/constants/route";
 import { postSignIn, postSignUp } from "./api";
-import { AUTH_USER_DATA, UserRoutes } from "@/constants/constants";
+import { AUTH_USER_COOKIE, UserRoutes } from "@/constants/constants";
 import { handleErrorResponse } from "@/utils/axios";
 import { loadAuth } from "@/redux/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
@@ -57,7 +57,6 @@ export const useUser = () => {
 
       toast.success(ValidationMessage.SIGNIN_SUCCESS);
       // User role based navigation
-      
       const userRole = res?.data?.user.role_name;
       router.push(UserRoutes[userRole]);
     },
