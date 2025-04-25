@@ -6,18 +6,19 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import Cookies from "@/utils/cookies";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import store from "@/redux/store";
 import { resetAuth } from "@/redux/authSlice";
 import useAuthUser from "@/hooks/useAuthUser";
+import { AUTH_USER_COOKIE } from "@/constants/constants";
+import { clearCookie } from "@/utils/cookies";
 
 const Header = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const handleLogout = () => {
-    Cookies.deleteItem(Cookies.AUTH_USER_DATA);
+    clearCookie(AUTH_USER_COOKIE);
     router.push("/");
     dispatch(resetAuth());
   };

@@ -8,11 +8,11 @@ import { useState } from "react";
 import { ValidationMessage } from "@/constants/messages";
 import { BrowserRoute } from "@/constants/route";
 import { postSignIn, postSignUp } from "./api";
-import { UserRoutes } from "@/constants/constants";
+import { AUTH_USER_COOKIE, UserRoutes } from "@/constants/constants";
 import { handleErrorResponse } from "@/utils/axios";
-import Cookies from "@/utils/cookies";
 import { loadAuth } from "@/redux/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
+import { storeCookie } from "@/utils/cookies";
 
 export const useUser = () => {
   const router = useRouter();
@@ -48,11 +48,6 @@ export const useUser = () => {
         roleName: responseData.user.role_name,
       };
 
-      Cookies.setItem(
-        Cookies.AUTH_USER_DATA,
-        JSON.stringify({ token: responseData.token, user: userData })
-      );
-
       dispatch(
         loadAuth({
           token: responseData.token,
@@ -62,7 +57,6 @@ export const useUser = () => {
 
       toast.success(ValidationMessage.SIGNIN_SUCCESS);
       // User role based navigation
-      
       const userRole = res?.data?.user.role_name;
       router.push(UserRoutes[userRole]);
     },
