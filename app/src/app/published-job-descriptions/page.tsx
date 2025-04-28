@@ -10,7 +10,7 @@ const OpenJobDescriptions = () => {
     useGetJobDescriptions();
   const router = useRouter();
 
-  if (isLoading) return <p>Loading.............</p>;
+  if (isLoading) return <p>Loading.........</p>;
 
   if (isError)
     return (
@@ -26,7 +26,7 @@ const OpenJobDescriptions = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-900">
-        Current openings
+        {publishedJobDescriptions.length==0 ? ("We are not hiring") : ("Current Openings")}
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-8">
         {publishedJobDescriptions.map((job) => (
