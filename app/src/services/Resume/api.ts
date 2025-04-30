@@ -32,16 +32,16 @@ export interface GetResumesListParams {
   status?: string;
 }
 
-export async function GetResumesList(
-  params: GetResumesListParams
-): Promise<GetResumesListResponse> {
+export async function getResumesList({
+  job_description_id,
+}: GetResumesListParams): Promise<GetResumesListResponse> {
   const state = store.getState();
   const token = state.auth.token;
   const response = await axiosInstance.get<GetResumesListResponse>(
     ApiRoute.Resumes,
     {
       params: {
-        job_description_id: params.job_description_id
+        job_description_id: job_description_id,
       },
       headers: { Authorization: token },
     }

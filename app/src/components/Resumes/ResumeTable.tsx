@@ -4,8 +4,8 @@ import { useGetResumesList } from "@/services/Resume/hooks";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
-const ResumeTable = (params: GetResumesListParams) => {
-  const { data, isLoading, isError } = useGetResumesList(params);
+const ResumeTable = ({job_description_id}: GetResumesListParams) => {
+  const { data, isLoading, isError } = useGetResumesList({job_description_id});
 
   const router = useRouter();
 
