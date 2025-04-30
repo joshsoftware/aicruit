@@ -34,6 +34,10 @@ Rails.application.routes.draw do
         get :index    # GET /resumes
         post :create  # POST /resumes
       end
+      
+      member do
+        get :show
+      end
     end
   end
 end
