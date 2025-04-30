@@ -10,6 +10,7 @@ import { UserRoles } from "@/constants/constants";
 import JobDescriptionHeader from "@/components/JobDescriptions/JobDescriptionHeader";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface SectionVisibilityState {
   [key: string]: boolean;
@@ -27,6 +28,7 @@ const formatSectionTitle = (key: string): string =>
 const JobDescriptionDetailsContainer: React.FC<
   JobDescriptionDetailsContainerProps
 > = ({ params: { job_description_id } }) => {
+  const router = useRouter();
   const jobId = Number(job_description_id);
   const {
     data: jobDescriptionDetails,
@@ -81,6 +83,10 @@ const JobDescriptionDetailsContainer: React.FC<
 
   const sectionKeys = Object.keys(jobDescriptionDetails.parsed_data).sort();
 
+  const handleViewAllResumes = () => {
+    router.push(`${jobId}/resume`);
+  };
+
   return (
     <>
       <div className="mt-4 px-6">
@@ -94,6 +100,7 @@ const JobDescriptionDetailsContainer: React.FC<
             status={jobDescriptionDetails.status}
             onEdit={() => setIsEditing(true)}
             isCandidate={isCandidate}
+            handleViewAllResumes={handleViewAllResumes}
           />
           <div className="p-6 space-y-4">
             {sectionKeys.map((key) => {

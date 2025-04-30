@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import store from "@/redux/store";
 import { resetAuth } from "@/redux/authSlice";
 import useAuthUser from "@/hooks/useAuthUser";
 import { AUTH_USER_COOKIE } from "@/constants/constants";
