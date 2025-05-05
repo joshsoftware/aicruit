@@ -30,4 +30,14 @@ class Api::V1::ResumesController < ApplicationController
       render json: result.to_h, status: :unprocessable_entity
     end
   end
+
+  def show
+    result = ResumeService::Show.new(params[:id]).call
+
+    if result[:success]
+      render json: result.to_h, status: :ok
+    else
+      render json: result.to_h, status: :unprocessable_entity
+    end
+  end
 end
