@@ -1,11 +1,12 @@
 "use client";
 import { GetResumesListParams, Resume } from "@/services/Resume/api";
 import { useGetResumesList } from "@/services/Resume/hooks";
+import { formatResumeStatus } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
-const ResumeTable = ({job_description_id}: GetResumesListParams) => {
-  const { data, isLoading, isError } = useGetResumesList({job_description_id});
+const ResumeTable = ({ job_description_id }: GetResumesListParams) => {
+  const { data, isLoading, isError } = useGetResumesList({job_description_id,});
 
   const router = useRouter();
 
@@ -68,7 +69,7 @@ const ResumeTable = ({job_description_id}: GetResumesListParams) => {
                 {resume.years_of_experience} yrs
               </td>
               <td className="px-6 py-2 text-sm text-black-tertiary">
-                {resume.status}
+                {formatResumeStatus(resume.status)}
               </td>
               <td className="px-6 py-2 text-right text-sm">
                 <button
