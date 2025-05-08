@@ -26,7 +26,7 @@ const Header = () => {
   return (
     <header
       className={cn(
-        "flex justify-center items-center bg-[#F4F3FF] sticky top-0",
+        "flex justify-center items-center bg-[#F4F3FF] sticky top-0 z-50",
         primaryFont.className
       )}
     >
