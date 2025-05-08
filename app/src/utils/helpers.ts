@@ -6,3 +6,11 @@ export const formatDate = (isoString?: string): string => {
 
   return date.toLocaleDateString("en-GB").replace(/\//g, "-");
 };
+
+export const formatResumeStatus = (status: string): string => {
+  return status
+    .replace(/^hr/, "HR ")
+    .replace(/([a-zA-Z])(\d)/g, "$1 $2")
+    .replace(/(\d)([a-zA-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};

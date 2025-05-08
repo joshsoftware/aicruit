@@ -18,6 +18,7 @@ export interface Resume {
   missing_skills: string[];
   years_of_experience: number;
   link_to_file: string;
+  referred_by: string;
   status: string;
 }
 
@@ -30,6 +31,12 @@ export interface GetResumesListResponse {
 export interface GetResumesListParams {
   job_description_id?: number;
   status?: string;
+}
+
+export interface GetResumeByIdResponse {
+  success: boolean;
+  data: Resume;
+  message: string;
 }
 
 export async function getResumesList({
@@ -47,5 +54,19 @@ export async function getResumesList({
     }
   );
 
+  return response.data;
+}
+
+export async function getResumeById(
+  id: number
+): Promise<GetResumeByIdResponse> {
+  const state = store.getState();
+  const token = state.auth.token;
+  const response = await axiosInstance.get<GetResumeByIdResponse>(
+    `${ApiRoute.Resumes}/${id}`,
+    {
+      headers: { Authorization: token },
+    }
+  );
   return response.data;
 }
