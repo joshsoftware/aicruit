@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  jd_id: MyString
+  candidate_name: MyString
+  link_to_file: MyString
+  is_interviewed: false
+  primary_skills: MyString
+  secondary_skills: MyString
+  responsibilities: MyString
+  years_of_experience: 1
+  projects: MyString
+  parsed_data: 
+  uploaded_by: 1
+
+two:
+  jd_id: MyString
+  candidate_name: MyString
+  link_to_file: MyString
+  is_interviewed: false
+  primary_skills: MyString
+  secondary_skills: MyString
+  responsibilities: MyString
+  years_of_experience: 1
+  projects: MyString
+  parsed_data: 
+  uploaded_by: 1
