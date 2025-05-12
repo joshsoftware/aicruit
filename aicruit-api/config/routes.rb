@@ -31,12 +31,13 @@ Rails.application.routes.draw do
 
     resources :resumes, only: [] do
       collection do
-        get :index    # GET /resumes
-        post :create  # POST /resumes
+        get :index  
+        post :create
       end
       
       member do
         get :show
+        put :update
       end
     end
   end
