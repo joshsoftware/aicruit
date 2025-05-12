@@ -11,9 +11,9 @@ module ResumeService
 
     def call
       return failure_response(message, errors) unless set_resume
-      
+
       set_data
-      success_response(message, data);
+      success_response(message, data)
     end
 
     private

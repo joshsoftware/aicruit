@@ -55,7 +55,7 @@ module ResumeService
 
     def resume_params
       params.permit(:job_description_id, :candidate_email, :candidate_first_name, :candidate_last_name,
-                    :years_of_experience, :link_to_file, :status, :company_id,
+                    :years_of_experience, :link_to_file, :status, :company_id, :candidate_mobile_no, :rating,
                     primary_skills: [], secondary_skills: [], domain_expertise: [],
                     matching_skills: [], missing_skills: [])
     end
