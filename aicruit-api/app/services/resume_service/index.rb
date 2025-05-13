@@ -31,8 +31,15 @@ module ResumeService
     def set_resumes
       @resumes = Resume.where(company_id: current_user.company_id)
       @resumes = @resumes.where(job_description_id: params[:job_description_id]) if params[:job_description_id].present?
-      @resumes = @resumes.where("candidate_email LIKE ? OR candidate_first_name LIKE ? OR candidate_last_name LIKE ?", "%#{params[:search_key]}%", "%#{params[:search_key]}%", "%#{params[:search_key]}%") if params[:search_key].present?
 
+      if params[:search_key].present?
+        key = "%#{params[:search_key].downcase}%"
+        @resumes = @resumes.where(
+          "LOWER(candidate_email) LIKE :key OR LOWER(candidate_first_name) LIKE :key OR LOWER(candidate_last_name) LIKE :key OR LOWER(CONCAT(candidate_first_name, ' ', candidate_last_name)) LIKE :key",
+          key: key
+        )
+      end
+      
       if params[:sort_key].present?
         sort_field, sort_dir = params[:sort_key].split("_")
 

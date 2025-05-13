@@ -1,4 +1,5 @@
 "use client";
+import { RESUME_STATUS_CLASSES } from "@/constants/constants";
 import { GetResumesListParams, Resume } from "@/services/Resume/api";
 import { useGetResumesList } from "@/services/Resume/hooks";
 import { formatResumeStatus } from "@/utils/helpers";
@@ -11,7 +12,11 @@ const ResumeTable = ({
   searchKey,
   sortKey,
 }: GetResumesListParams) => {
-  const { data, isLoading, isError } = useGetResumesList({
+  const {
+    data: resumeData,
+    isLoading,
+    isError,
+  } = useGetResumesList({
     job_description_id,
     searchKey,
     sortKey,
@@ -26,15 +31,15 @@ const ResumeTable = ({
   const getStatusClasses = (status: string) => {
     switch (status.toLowerCase()) {
       case "applied":
-        return "px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800";
+        return RESUME_STATUS_CLASSES.APPLIED;
       case "shortlisted":
-        return "px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800";
+        return RESUME_STATUS_CLASSES.SHORTLISTED;
       case "rejected":
-        return "px-2 py-1 text-xs rounded-full bg-red-100 text-red-800";
+        return RESUME_STATUS_CLASSES.REJECTED;
       case "hired":
-        return "px-2 py-1 text-xs rounded-full bg-green-100 text-green-800";
+        return RESUME_STATUS_CLASSES.HIRED;
       default:
-        return "px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800";
+        return RESUME_STATUS_CLASSES.DEFAULT;
     }
   };
 
@@ -90,14 +95,14 @@ const ResumeTable = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data?.data.length === 0 ? (
+          {resumeData?.data.length === 0 ? (
             <tr>
               <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                 No resumes found
               </td>
             </tr>
           ) : (
-            data?.data.map((resume) => (
+            resumeData?.data.map((resume) => (
               <tr key={resume.id} className="hover:bg-gray-50">
                 <td className="px-6 py-2 text-sm text-black-tertiary">
                   #{resume.id}

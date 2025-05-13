@@ -1,6 +1,8 @@
 "use client";
 import ResumeTable from "@/components/Resumes/ResumeTable";
 import React, { useState } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 interface ResumeDetailsContainerProp {
   params: {
@@ -18,21 +20,9 @@ const Resumes: React.FC<ResumeDetailsContainerProp> = ({
     <div className="mt-5">
       <div className="flex items-center">
         <div className="relative">
+          {/* Serach Icon */}
           <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg
-              className="h-5 w-5 text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 5.65a7.5 7.5 0 010 10.6z"
-              />
-            </svg>
+            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
           </span>
           <input
             type="text"
@@ -61,20 +51,9 @@ const Resumes: React.FC<ResumeDetailsContainerProp> = ({
             <option value="status_asc">Status (A–Z)</option>
             <option value="status_desc">Status (Z–A)</option>
           </select>
-
+          {/* down arrow icoon for sort */}
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-            <svg
-              className="h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 12a1 1 0 01-.7-.29l-3-3a1 1 0 111.4-1.42L10 9.58l2.3-2.3a1 1 0 111.4 1.42l-3 3A1 1 0 0110 12z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <ChevronDownIcon className="h-4 w-4" />
           </div>
         </div>
       </div>
