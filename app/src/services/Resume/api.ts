@@ -31,6 +31,8 @@ export interface GetResumesListResponse {
 export interface GetResumesListParams {
   job_description_id?: number;
   status?: string;
+  searchKey?: string;
+  sortKey?: string;
 }
 
 export interface GetResumeByIdResponse {
@@ -41,6 +43,8 @@ export interface GetResumeByIdResponse {
 
 export async function getResumesList({
   job_description_id,
+  searchKey,
+  sortKey,
 }: GetResumesListParams): Promise<GetResumesListResponse> {
   const state = store.getState();
   const token = state.auth.token;
@@ -49,6 +53,8 @@ export async function getResumesList({
     {
       params: {
         job_description_id: job_description_id,
+        search_key: searchKey,
+        sort_key: sortKey,
       },
       headers: { Authorization: token },
     }

@@ -14,13 +14,7 @@ interface JobDescriptionEditFormProps {
 }
 
 interface ParsedData {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | Record<string, any>
-    | undefined;
+  [key: string]: string | string[] | boolean | number | Record<string, any>;
 }
 
 const formatSectionTitle = (key: string): string => {
@@ -218,6 +212,12 @@ const JobDescriptionEditForm: React.FC<JobDescriptionEditFormProps> = ({
                       render={({ field }) => (
                         <input
                           {...field}
+                          value={
+                            typeof field.value === "string" ||
+                            typeof field.value === "number"
+                              ? field.value
+                              : ""
+                          }
                           className="flex-1 rounded-md border border-gray-300 px-3 py-2"
                         />
                       )}

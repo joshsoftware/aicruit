@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getResumeById, getResumesList, GetResumesListParams } from "./api";
 
-export function useGetResumesList({job_description_id}: GetResumesListParams) {
+export function useGetResumesList({
+  job_description_id,
+  searchKey,
+  sortKey,
+}: GetResumesListParams) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["get-resumes"],
-    queryFn: () => getResumesList({ job_description_id }),
+    queryKey: ["get-resumes", searchKey, sortKey],
+    queryFn: () => getResumesList({ job_description_id, searchKey, sortKey }),
   });
 
   return {

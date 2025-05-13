@@ -31,6 +31,30 @@ module ResumeService
     def set_resumes
       @resumes = Resume.where(company_id: current_user.company_id)
       @resumes = @resumes.where(job_description_id: params[:job_description_id]) if params[:job_description_id].present?
+
+      if params[:search_key].present?
+        key = "%#{params[:search_key].downcase}%"
+        @resumes = @resumes.where(
+          "LOWER(candidate_email) LIKE :key OR LOWER(candidate_first_name) LIKE :key OR LOWER(candidate_last_name) LIKE :key OR LOWER(CONCAT(candidate_first_name, ' ', candidate_last_name)) LIKE :key",
+          key: key
+        )
+      end
+      
+      if params[:sort_key].present?
+        sort_field, sort_dir = params[:sort_key].split("_")
+
+        sort_column_map = {
+          "firstname" => "candidate_first_name",
+          "lastname" => "candidate_last_name",
+          "email" => "candidate_email",
+          "experience" => "years_of_experience",
+          "status" => "status"
+        }
+
+        if sort_column_map.key?(sort_field) && %w[asc desc].include?(sort_dir)
+          @resumes = @resumes.order("#{sort_column_map[sort_field]} #{sort_dir.upcase}")
+        end
+      end
     end
 
     def set_data
