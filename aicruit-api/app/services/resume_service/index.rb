@@ -29,7 +29,7 @@ module ResumeService
     end
 
     def set_resumes
-      @resumes = Resume.where(company_id: current_user.company_id)
+      @resumes = Resume.where(company_id: current_user.company_id).order(rating: :desc)
       @resumes = @resumes.where(job_description_id: params[:job_description_id]) if params[:job_description_id].present?
 
       if params[:search_key].present?

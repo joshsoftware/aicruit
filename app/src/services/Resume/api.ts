@@ -20,6 +20,8 @@ export interface Resume {
   link_to_file: string;
   referred_by: string;
   status: string;
+  rating: string;
+  candidate_mobile_no: string;
 }
 
 export interface GetResumesListResponse {
