@@ -88,6 +88,12 @@ const ResumeTable = ({
             </th>
             <th
               scope="col"
+              className="px-6 py-2 text-left text-sm font-medium text-gray-dark"
+            >
+              Rating
+            </th>
+            <th
+              scope="col"
               className="px-6 py-2 text-right text-sm font-medium text-gray-dark"
             >
               Actions
@@ -105,7 +111,7 @@ const ResumeTable = ({
             resumeData?.data.map((resume) => (
               <tr key={resume.id} className="hover:bg-gray-50">
                 <td className="px-6 py-2 text-sm text-black-tertiary">
-                  #{resume.id}
+                  {resume.id}
                 </td>
                 <td className="px-6 py-2 text-sm text-black-tertiary">
                   {resume.candidate_first_name} {resume.candidate_last_name}
@@ -120,6 +126,25 @@ const ResumeTable = ({
                   <span className={getStatusClasses(resume.status)}>
                     {formatResumeStatus(resume.status)}
                   </span>
+                </td>
+                <td className="px-6 py-2 text-sm text-black-tertiary">
+                  <div className="flex items-center gap-2">
+                    <div className="w-full h-2 rounded bg-gray-200">
+                      <div
+                        className={`h-full rounded transition-all duration-300 ${
+                          Number(resume.rating) >= 75
+                            ? "bg-green-500"
+                            : Number(resume.rating) >= 50
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${resume.rating}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
+                      {resume.rating}%
+                    </span>
+                  </div>
                 </td>
                 <td className="px-6 py-2 text-right text-sm">
                   <div className="flex justify-end space-x-4">
