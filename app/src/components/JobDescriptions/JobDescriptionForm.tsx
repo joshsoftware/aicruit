@@ -3,7 +3,7 @@ import React, { useState, ChangeEvent } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { useParseJobDescription } from "@/services/JobDescription/hooks";
 import { Button } from "@/components/ui/button";
-import DisplayUploadedFile from "../DisplayUploadFile";
+import DisplayUploadedFile from "../ui/DisplayUploadFile";
 import { MAX_FILE_SIZE_MB } from "@/constants/constants";
 
 interface JobDescriptionPayload {

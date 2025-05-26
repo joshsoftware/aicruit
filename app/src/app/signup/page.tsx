@@ -1,5 +1,5 @@
-import NavigateBack from "@/components/NavigateBack";
-import UserForm from "@/components/UserForm";
+import NavigateBack from "@/components/ui/NavigateBack";
+import UserForm from "@/components/ui/UserForm";
 
 export default async function Page() {
   return (

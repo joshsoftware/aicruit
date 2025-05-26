@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Input } from "./ui/input";
-import { Button, buttonVariants } from "./ui/button";
+import { Input } from "./input";
+import { Button, buttonVariants } from "./button";
 import {
   Form,
   FormControl,
