@@ -39,22 +39,22 @@ module ResumeService
           key: key
         )
       end
-      
-      if params[:sort_key].present?
-        sort_field, sort_dir = params[:sort_key].split("_")
 
-        sort_column_map = {
-          "firstname" => "candidate_first_name",
-          "lastname" => "candidate_last_name",
-          "email" => "candidate_email",
-          "experience" => "years_of_experience",
-          "status" => "status"
-        }
+      return unless params[:sort_key].present?
 
-        if sort_column_map.key?(sort_field) && %w[asc desc].include?(sort_dir)
-          @resumes = @resumes.order("#{sort_column_map[sort_field]} #{sort_dir.upcase}")
-        end
-      end
+      sort_field, sort_dir = params[:sort_key].split('_')
+
+      sort_column_map = {
+        'firstname' => 'candidate_first_name',
+        'lastname' => 'candidate_last_name',
+        'email' => 'candidate_email',
+        'experience' => 'years_of_experience',
+        'status' => 'status'
+      }
+
+      return unless sort_column_map.key?(sort_field) && %w[asc desc].include?(sort_dir)
+
+      @resumes = @resumes.order("#{sort_column_map[sort_field]} #{sort_dir.upcase}")
     end
 
     def set_data

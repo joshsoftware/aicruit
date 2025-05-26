@@ -22,4 +22,14 @@ class Api::V1::UsersController < ApplicationController
       render json: result.to_h, status: :unprocessable_entity
     end
   end
+
+  def google_sign_in
+    result = UserService::GoogleSignIn.new(params[:token]).call
+
+    if result[:success]
+      render json: result.to_h, status: :ok
+    else
+      render json: result.to_h, status: :unauthorized
+    end
+  end
 end

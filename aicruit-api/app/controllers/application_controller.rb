@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::API
   include ActionController::Serialization
 
@@ -5,8 +7,8 @@ class ApplicationController < ActionController::API
 
   before_action :authenticate!
 
-  rescue_from CanCan::AccessDenied do |exception|
-    render json: { message: I18n.t('exception.authorized')}, status: :unauthorized
+  rescue_from CanCan::AccessDenied do |_exception|
+    render json: { message: I18n.t('exception.authorized') }, status: :unauthorized
   end
 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_record_invalid
@@ -20,8 +22,8 @@ class ApplicationController < ActionController::API
       jwt_payload(header)
       raise ActiveRecord::RecordNotFound unless current_user
     rescue ActiveRecord::RecordNotFound
-      render json: { message: I18n.t('exception.record_not_found')}, status: :unauthorized
-    rescue JWT::DecodeError => e
+      render json: { message: I18n.t('exception.record_not_found') }, status: :unauthorized
+    rescue JWT::DecodeError
       render json: { message: I18n.t('exception.token_not_found') }, status: :unauthorized
     end
   end
@@ -38,14 +40,12 @@ class ApplicationController < ActionController::API
     end
   end
 
-   def current_tenant
+  def current_tenant
     @current_company
-   end
+  end
 
   def current_user
-    if @jwt_payload
-      @current_user ||= User.find_by_id(@jwt_payload['user_id']) if @jwt_payload.has_key?('user_id')
-    end
+    @current_user ||= User.find_by_id(@jwt_payload['user_id']) if @jwt_payload&.key?('user_id')
     @current_user
   end
 

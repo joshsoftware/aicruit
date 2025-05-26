@@ -82,3 +82,8 @@ gem 'versionist'
 gem 'acts_as_tenant'
 
 gem 'aasm'
+
+gem 'google-apis-calendar_v3'
+gem 'google-id-token'
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
