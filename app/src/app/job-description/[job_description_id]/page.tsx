@@ -4,13 +4,13 @@ import { useJobDescriptionDetailsHook } from "@/services/JobDescription/hooks";
 import JobDescriptionEditForm from "@/components/JobDescriptions/JobDescriptionEditForm";
 import JobDescriptionDetailsSkeleton from "@/components/JobDescriptions/JobDescriptionDetailsSkeleton";
 import FetchError from "@/components/ui/FetchError";
-import NavigateBack from "@/components/NavigateBack";
 import useAuthUser from "@/hooks/useAuthUser";
 import { UserRoles } from "@/constants/constants";
 import JobDescriptionHeader from "@/components/JobDescriptions/JobDescriptionHeader";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import NavigateBack from "@/components/ui/NavigateBack";
 
 interface SectionVisibilityState {
   [key: string]: boolean;
