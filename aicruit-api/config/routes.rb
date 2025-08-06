@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       collection do
         get :index    # GET /resumes
         post :create  # POST /resumes
+        post :upload
       end
     end
   end

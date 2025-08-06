@@ -53,3 +53,14 @@ en:
     errors:
       not_found: 'User account does not exist'
       invalid_password: 'Password is invalid please enter correct password'
+  errors:
+    not_found: ""
+    unauthorized: ""
+    file:
+      missing: "PDF file is missing"
+      invalid_format: "Unsupported file format"
+  aws:
+    s3:
+      upload:
+        success: "File successfully uploaded to S3 bucket"
+        failure: "Failed to upload the file to S3 bucket"
