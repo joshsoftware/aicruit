@@ -38,6 +38,8 @@ dbCursor = initDbConnection()
 import traceback
 from util import generate_timestamp_jon
 from fastapi_versionizer.versionizer import Versionizer, api_version
+from parse_s3_url import get_text_from_s3_file  # Import S3 helper
+from ai_parser import parse_jd_with_ai
 
 app = FastAPI()
 
@@ -225,56 +227,35 @@ async def analyse_interview(
 
     except Exception as e:
         return JSONResponse(content={"result": str(e)}, status_code=500)
-    
-def get_job_description_contents(file_url: Optional[str], jd_file: Optional[UploadFile]):
-    if jd_file:
-        file_contents = read_contents_of_file(jd_file)
-    elif file_url:
-        file_contents = read_docx(file_url)
-
-    parsed_jd_contents = parse_jd_from_llm(file_contents)
-
-    if parsed_jd_contents:
-        return parsed_jd_contents
-    
-    return None
-
+ 
 @app.post("/parse-job-description")
-async def parse_job_description(
-    title: str = Form(...),
-    file_url: Optional[str] = Form(None),
-    jd_file: UploadFile = File(None),
-):
+async def parse_job_description(jd_s3_url: str = Form(...)):
     try:
-        # Validate input params
-        if not title or not (file_url or jd_file):
+        jd_text = get_text_from_s3_file(jd_s3_url)
+        if not jd_text:
             return JSONResponse(status_code=400, content={
                 "status": False,
                 "data": {},
-                "message": "Invalid request, missing params"
+                "message": "Failed to extract JD text"
             })
-        
-        jd_file_contents = get_job_description_contents(file_url, jd_file)
-        if not jd_file_contents:
-            return JSONResponse(status_code=400, content={
-                "status": False,
-                "data": {},
-                "message": "Failed to read job description contents"
-            })
-        
+
+        parsed_data = parse_jd_with_ai(jd_text)
+
         return JSONResponse(status_code=200, content={
             "status": True,
-            "data": {"title": title, "parsed_data": jd_file_contents},
+            "data": parsed_data,
             "message": "Job description parsed successfully!"
         })
-
     except Exception as e:
         return JSONResponse(status_code=500, content={
             "status": False,
             "data": {},
             "message": f"Internal server error: {str(e)}"
         })
-    
+
+
+
+
 def process_interview_analysis(conn_string, analysis_id, request):
     """
     Background task to handle transcription, speaker diarization, and job description alignment.
@@ -417,23 +398,23 @@ def update_interview_analysis(conn_string, record_id, transcript, questions_answ
     finally:
         return is_updated
 
-def read_contents_of_file(transcript_file: UploadFile) -> str:
-    """
-    Save the uploaded file to disk temporarily, reopen it, and extract text.
-    """
-    try:
-        file_object = io.BytesIO(transcript_file.file.read())
-        doc = Document(file_object)
+# def read_contents_of_file(transcript_file: UploadFile) -> str:
+#     """
+#     Save the uploaded file to disk temporarily, reopen it, and extract text.
+#     """
+#     try:
+#         file_object = io.BytesIO(transcript_file.file.read())
+#         doc = Document(file_object)
         
-        full_text = []
-        for para in doc.paragraphs:
-            full_text.append(para.text)
+#         full_text = []
+#         for para in doc.paragraphs:
+#             full_text.append(para.text)
         
-        file_contents =  '\n'.join(full_text)
-        return file_contents
-    except Exception as e:
-        print(f"Error reading file: {e}")
-        return None
+#         file_contents =  '\n'.join(full_text)
+#         return file_contents
+#     except Exception as e:
+#         print(f"Error reading file: {e}")
+#         return None
 
 def get_question_answers_from_file(file_content: str) -> Dict:
     """
