@@ -16,6 +16,14 @@ class ApplicationController < ActionController::API
   def authenticate!
     header = request.headers['Authorization']
     header = header.split.last if header
+
+    # Check if it's the Python service API key
+    if header.present? && header == ENV['PYTHON_SERVICE_API_KEY']
+      @current_user = nil # or a system user if you want to use CanCan
+      @current_service = "python-service"
+      return true
+    end
+
     begin
       jwt_payload(header)
       raise ActiveRecord::RecordNotFound unless current_user

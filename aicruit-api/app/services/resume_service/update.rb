@@ -2,12 +2,11 @@
 
 module ResumeService
   class Update < Base
-    attr_reader :params, :current_user, :resume
+    attr_reader :params, :resume
 
-    def initialize(params, current_user)
+    def initialize(params)
       super()
       @params = params
-      @current_user = current_user
     end
 
     def call
@@ -21,7 +20,7 @@ module ResumeService
     private
 
     def find_resume
-      @resume = Resume.find_by(id: params[:id], company_id: current_user.company_id)
+      @resume = Resume.find_by(id: params[:id])
       unless @resume
         @message = I18n.t('model.found.failure', model_name: 'Resume')
         return false

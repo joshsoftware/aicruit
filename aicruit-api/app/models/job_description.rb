@@ -14,7 +14,7 @@ class JobDescription < ApplicationRecord
   validates :user, presence: true
   validates :company, presence: true
   validates :status, presence: true
-  validates :parsed_data, presence: true
+  # validates :parsed_data, presence: true
 
   after_initialize :set_default_status, if: :new_record?
 

@@ -85,3 +85,8 @@ gem 'acts_as_tenant'
 gem 'aasm'
 
 gem 'aws-sdk-s3', require: false
+
+# Background job processing
+gem 'sidekiq', '~> 7.2'
+# External service calls
+gem 'httparty', '~> 0.21.0', require: false

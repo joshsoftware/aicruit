@@ -20,6 +20,7 @@ Rails.application.routes.draw do
         post :create
         get :index
         get :published
+        post :upload
       end
 
       member do

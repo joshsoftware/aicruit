@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module ResumeService
+module JobDescriptionService
   class Upload < Base
-    attr_reader :params, :current_user, :link_to_file, :message, :response
+    attr_reader :params, :current_user, :file_url, :message, :response
 
     def initialize(params, current_user)
       super()
@@ -16,7 +16,7 @@ module ResumeService
       return failure_response(I18n.t('errors.file.invalid_format')) unless valid_pdf_format?
       return failure_response(message, errors) unless upload_file_to_s3
 
-      @response = create_resume
+      @response = create_job_description
       set_data
       response[:success] ? success_response(message, data) : failure_response(message, errors)
     end
@@ -42,12 +42,12 @@ module ResumeService
 
     def upload_file_to_s3
       file = params[:pdf_file]
-      service = AwsService::S3Upload.new(file, :resume)
+      service = AwsService::S3Upload.new(file, :job_description)
       result = service.call
 
       if result[:success]
         # File uploaded successfully
-        @link_to_file = result[:data][:file_url]
+        @file_url = result[:data][:file_url]
       else
         @message = I18n.t('aws.s3.upload.failure')
         @errors = result[:message]
@@ -56,12 +56,12 @@ module ResumeService
       true
     end
 
-    def create_resume
-      merged_params = params.merge(link_to_file:).except(:pdf_file)
-      result = ResumeService::Create.new(merged_params, current_user).call
+    def create_job_description
+      merged_params = params.merge(file_url:).except(:pdf_file)
+      result = JobDescriptionService::Create.new(merged_params, current_user).call
       if result[:success] && result[:data]
         # Enqueue background job for additional processing
-        ResumeProcessingJob.perform_later(result[:data].object.id, result[:data].object.link_to_file)
+        JobDescriptionProcessingJob.perform_later(result[:data].object.id, result[:data].object.file_url)
       end
       result
     end
