@@ -228,30 +228,51 @@ async def analyse_interview(
     except Exception as e:
         return JSONResponse(content={"result": str(e)}, status_code=500)
  
-@app.post("/parse-job-description")
-async def parse_job_description(jd_s3_url: str = Form(...)):
-    try:
-        jd_text = get_text_from_s3_file(jd_s3_url)
-        if not jd_text:
-            return JSONResponse(status_code=400, content={
-                "status": False,
-                "data": {},
-                "message": "Failed to extract JD text"
-            })
+# Request model
+class JDRequest(BaseModel):
+    id: str
+    file_url: str
 
+
+@app.post("/parse-job-description")
+async def parse_job_description(request: JDRequest):
+    try:
+        # Extract text from the S3 file URL
+        jd_text = get_text_from_s3_file(request.file_url)
+        if not jd_text:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": False,
+                    "data": {},
+                    "message": "Failed to extract JD text"
+                }
+            )
+
+        # Parse JD text using AI
         parsed_data = parse_jd_with_ai(jd_text)
 
-        return JSONResponse(status_code=200, content={
-            "status": True,
-            "data": parsed_data,
-            "message": "Job description parsed successfully!"
-        })
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": True,
+                "data": {
+                    "jd_id": request.id,
+                    "parsed": parsed_data
+                },
+                "message": "Job description parsed successfully!"
+            }
+        )
+
     except Exception as e:
-        return JSONResponse(status_code=500, content={
-            "status": False,
-            "data": {},
-            "message": f"Internal server error: {str(e)}"
-        })
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": False,
+                "data": {},
+                "message": f"Internal server error: {str(e)}"
+            }
+        )
 
 
 
@@ -398,23 +419,23 @@ def update_interview_analysis(conn_string, record_id, transcript, questions_answ
     finally:
         return is_updated
 
-# def read_contents_of_file(transcript_file: UploadFile) -> str:
-#     """
-#     Save the uploaded file to disk temporarily, reopen it, and extract text.
-#     """
-#     try:
-#         file_object = io.BytesIO(transcript_file.file.read())
-#         doc = Document(file_object)
+def read_contents_of_file(transcript_file: UploadFile) -> str:
+    """
+    Save the uploaded file to disk temporarily, reopen it, and extract text.
+    """
+    try:
+        file_object = io.BytesIO(transcript_file.file.read())
+        doc = Document(file_object)
         
-#         full_text = []
-#         for para in doc.paragraphs:
-#             full_text.append(para.text)
+        full_text = []
+        for para in doc.paragraphs:
+            full_text.append(para.text)
         
-#         file_contents =  '\n'.join(full_text)
-#         return file_contents
-#     except Exception as e:
-#         print(f"Error reading file: {e}")
-#         return None
+        file_contents =  '\n'.join(full_text)
+        return file_contents
+    except Exception as e:
+        print(f"Error reading file: {e}")
+        return None
 
 def get_question_answers_from_file(file_content: str) -> Dict:
     """
