@@ -20,7 +20,7 @@ class ApplicationController < ActionController::API
     # Check if it's the Python service API key
     if header.present? && header == ENV['PYTHON_SERVICE_API_KEY']
       @current_user = nil # or a system user if you want to use CanCan
-      @current_service = "python-service"
+      @current_service = "python_service"
       return true
     end
 
@@ -62,7 +62,7 @@ class ApplicationController < ActionController::API
   end
 
   def current_ability
-    @current_ability ||= Ability.new(current_user)
+    @current_ability ||= Ability.new(current_user, @current_service)
   end
 
   private

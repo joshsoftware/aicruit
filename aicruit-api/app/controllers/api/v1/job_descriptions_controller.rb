@@ -26,9 +26,7 @@ class Api::V1::JobDescriptionsController < ApplicationController
   end
 
   def update
-    unless @current_service.eql? "python-service"
-      authorize! :update, JobDescription.find_by(id: params[:id])
-    end
+    authorize! :update, JobDescription.find_by(id: params[:id]), @current_service
     result = JobDescriptionService::Update.new(params[:id], params[:job_description]).call
     if result[:success]
       render json: result.to_h, status: :ok
