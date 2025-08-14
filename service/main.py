@@ -1,6 +1,6 @@
 import json
 import os
-from fastapi import FastAPI, BackgroundTasks, UploadFile, Form, File
+from fastapi import FastAPI, BackgroundTasks, UploadFile, Form, File, Request
 from fastapi.responses import JSONResponse
 import psycopg2
 from logger import logger
@@ -23,7 +23,8 @@ from conversation_diarization.speaker_diarization import create_prompt
 import ssl
 import logging
 from dotenv import load_dotenv
-from google.auth.transport.requests import Request
+# Avoid naming conflict with FastAPI's Request by not importing google's Request
+# from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
@@ -40,6 +41,8 @@ from util import generate_timestamp_jon
 from fastapi_versionizer.versionizer import Versionizer, api_version
 from parse_s3_url import get_text_from_s3_file  # Import S3 helper
 from ai_parser import parse_jd_with_ai
+import requests
+import time
 
 app = FastAPI()
 
@@ -235,32 +238,22 @@ class JDRequest(BaseModel):
 
 
 @app.post("/parse-job-description")
-async def parse_job_description(request: JDRequest):
+async def parse_job_description(request_body: JDRequest, request: Request, background_tasks: BackgroundTasks):
     try:
-        # Extract text from the S3 file URL
-        jd_text = get_text_from_s3_file(request.file_url)
-        if not jd_text:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "status": False,
-                    "data": {},
-                    "message": "Failed to extract JD text"
-                }
-            )
-
-        # Parse JD text using AI
-        parsed_data = parse_jd_with_ai(jd_text)
+        # Immediately acknowledge receipt and start background processing
+        print(f"JD parse: enqueue background task id={request_body.id}, file_url={request_body.file_url}")
+        background_tasks.add_task(
+            process_jd_parse_and_callback,
+            request_body.id,
+            request_body.file_url,
+        )
 
         return JSONResponse(
-            status_code=200,
+            status_code=202,
             content={
                 "status": True,
-                "data": {
-                    "jd_id": request.id,
-                    "parsed": parsed_data
-                },
-                "message": "Job description parsed successfully!"
+                "data": {"jd_id": request_body.id, "file_url": request_body.file_url},
+                "message": "Received S3 URL. Parsing will proceed in the background."
             }
         )
 
@@ -273,6 +266,77 @@ async def parse_job_description(request: JDRequest):
                 "message": f"Internal server error: {str(e)}"
             }
         )
+
+
+def process_jd_parse_and_callback(jd_id: str, file_url: str):
+    try:
+        print(f"JD parse: start background task id={jd_id}, file_url={file_url}")
+        # 1) Download and extract text from S3
+        jd_text = get_text_from_s3_file(file_url)
+        if not jd_text:
+            print("Failed to extract JD text from S3")
+            return
+        print(f"JD parse: extracted text length={len(jd_text)}")
+
+        # 2) Parse via AI with retry on failure (simple backoff)
+        max_retries = int(os.getenv("JD_PARSE_MAX_RETRIES", "2"))
+        backoff_seconds = int(os.getenv("JD_PARSE_BACKOFF_SECONDS", "3"))
+        attempt = 0
+        parsed_data = None
+        while attempt <= max_retries:
+            attempt += 1
+            parsed_data = parse_jd_with_ai(jd_text)
+            if not (isinstance(parsed_data, dict) and parsed_data.get("error")):
+                break
+            print(f"JD parse: parsing failed (attempt {attempt}/{max_retries}). error={parsed_data.get('error')}")
+            if attempt <= max_retries:
+                time.sleep(backoff_seconds)
+
+        # If still failed after retries, stop background job here
+        if isinstance(parsed_data, dict) and parsed_data.get("error"):
+            print("JD parse: parsing failed after retries. Giving up without callback.")
+            return
+
+        print("JD parse: AI parsing completed", parsed_data)
+
+        # 3) Send parsed result back to Rails API
+        rails_base_url = os.getenv("RAILS_API_BASE_URL")
+        if not rails_base_url:
+            print("RAILS_API_BASE_URL is not set")
+            return
+        print(f"JD parse: rails_base_url={rails_base_url}")
+
+        # Note: routes.rb defines member put :update, so path is /job_descriptions/:id/update
+        url = f"{rails_base_url}/job_descriptions/{jd_id}/update"
+        accept_header = os.getenv("RAILS_ACCEPT_HEADER")
+        rails_api_token = os.getenv("RAILS_API_TOKEN")
+        headers = {
+            "Content-Type": "application/json",
+        }
+        if accept_header:
+            headers["Accept"] = accept_header
+        if rails_api_token:
+            # If token is provided, send as Bearer; otherwise no Authorization header
+            headers["Authorization"] = f"Bearer {rails_api_token}"
+        print(f"JD parse: request headers -> has_accept={bool(accept_header)}, has_auth={bool(rails_api_token)}")
+
+        payload = {
+            "job_description": {
+                "parsed_data": parsed_data
+            }
+        }
+        try:
+            payload_size = len(json.dumps(payload))
+        except Exception:
+            payload_size = -1
+        print(f"JD parse: PUT {url} with payload_size={payload_size}")
+
+        response = requests.put(url, json=payload, headers=headers, timeout=30)
+        print(f"Rails update responded with {response.status_code}: {response.text}")
+        print(f"JD parse: completed id={jd_id}")
+
+    except Exception as e:
+        print(f"Error in process_jd_parse_and_callback: {e}")
 
 
 

@@ -1,4 +1,5 @@
 import json
+import re
 from fuzzywuzzy import process
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.llms import Ollama
@@ -44,7 +45,7 @@ def map_keys_semantically(parsed_json: Dict) -> Dict:
 # =========================
 # AI Model Config
 # =========================
-llm = Ollama(model="llama3")
+llm = Ollama(model="mistral:7b-instruct-q4_0")
 automatic_prompt = ChatPromptTemplate.from_template(
     """You are an expert job description parser. Parse this JD systematically.
 
@@ -75,18 +76,35 @@ Return ONLY a JSON object in this format:
 # Public Function
 # =========================
 def parse_jd_with_ai(jd_text: str) -> Dict:
-    """Send JD text to AI model and return structured JSON."""
+    """Send JD text to AI model and return structured JSON. Robust JSON extraction and cleanup."""
     response = llm.invoke(automatic_prompt.format(jd_text=jd_text))
-    response_text = str(response)
+    response_text = str(response).strip()
+    try:
+        preview = response_text[:2000]
+        print(f"JD AI raw response length={len(response_text)}", flush=True)
+        print(f"JD AI raw response preview={preview}", flush=True)
+    except Exception:
+        pass
 
-    json_start = response_text.find('{')
-    json_end = response_text.rfind('}') + 1
-    if json_start == -1 or json_end == -1:
-        return {"error": "No JSON found in AI response"}
+    # Prefer fenced JSON first
+    fenced = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", response_text)
+    if fenced:
+        candidate = fenced.group(1)
+    else:
+        # Fallback to the largest braces block
+        match = re.search(r"\{[\s\S]*\}", response_text)
+        if not match:
+            return {"error": "No JSON found in AI response"}
+        candidate = match.group(0)
+
+    # Cleanup common issues
+    candidate = candidate.replace("\\_", "_")  # unescape underscores
+    candidate = re.sub(r",\s*([}\]])", r"\1", candidate)  # remove trailing commas
 
     try:
-        raw_json = json.loads(response_text[json_start:json_end])
+        raw_json = json.loads(candidate)
     except json.JSONDecodeError:
+        print("JD AI JSON decode failed after cleanup", candidate[:500], flush=True)
         return {"error": "Failed to parse AI response as JSON"}
 
     return map_keys_semantically(raw_json)
