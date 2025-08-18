@@ -4,7 +4,7 @@ from fuzzywuzzy import process
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.llms import Ollama
 from typing import Dict
-
+from utils.prompt import PARSE_NEWJD_PROMPT
 # =========================
 # Key Mapping Logic
 # =========================
@@ -46,31 +46,7 @@ def map_keys_semantically(parsed_json: Dict) -> Dict:
 # AI Model Config
 # =========================
 llm = Ollama(model="mistral:7b-instruct-q4_0")
-automatic_prompt = ChatPromptTemplate.from_template(
-    """You are an expert job description parser. Parse this JD systematically.
-
-{jd_text}
-
-Return ONLY a JSON object in this format:
-{{
-  "title": null,
-  "company": null,
-  "company_description": null,
-  "experience_required": {{
-    "min_years": null,
-    "max_years": null
-  }},
-  "skills": {{
-    "must_have": ["skill1", "skill2"],
-    "good_to_have": ["skill1", "skill2"]
-  }},
-  "qualifications": ["degree1", "degree2"],
-  "responsibilities": ["resp1", "resp2"],
-  "location": null,
-  "employment_type": "Full-time"
-}}
-"""
-)
+automatic_prompt = ChatPromptTemplate.from_template(PARSE_NEWJD_PROMPT)
 
 # =========================
 # Public Function
