@@ -214,3 +214,44 @@ PARSE_JD_PROMPT = """
     Important: You must return only the JSON object. Do not add any explanations, headers, or other text outside the JSON object. If you include anything outside of the JSON, the response will be considered invalid.
     Do not prefix or suffix the response with any text like "Here is the analysis."
 """
+
+
+PARSE_RESUME_PROMPT="""
+You are a resume parser. Extract the following fields in JSON ONLY:
+- candidate_email
+- candidate_first_name
+- candidate_last_name
+- primary_skills (list)
+- secondary_skills (list)
+- domain_expertise (list)
+
+Resume text:
+{text}
+
+Return STRICTLY valid JSON, no explanations.
+"""
+
+PARSE_NEWJD_PROMPT="""
+You are an expert job description parser. Parse this JD systematically.
+
+{jd_text}
+
+Return ONLY a JSON object in this format:
+{{
+  "title": null,
+  "company": null,
+  "company_description": null,
+  "experience_required": {{
+    "min_years": null,
+    "max_years": null
+  }},
+  "skills": {{
+    "must_have": ["skill1", "skill2"],
+    "good_to_have": ["skill1", "skill2"]
+  }},
+  "qualifications": ["degree1", "degree2"],
+  "responsibilities": ["resp1", "resp2"],
+  "location": null,
+  "employment_type": "Full-time"
+}}
+"""
