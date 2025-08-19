@@ -2,10 +2,11 @@
 
 module ResumeService
   class Update < Base
-    attr_reader :params, :resume
+    attr_reader :id, :params, :resume
 
-    def initialize(params)
+    def initialize(id, params)
       super()
+      @id = id
       @params = params
     end
 
@@ -20,7 +21,7 @@ module ResumeService
     private
 
     def find_resume
-      @resume = Resume.find_by(id: params[:id])
+      @resume = Resume.find_by(id:)
       unless @resume
         @message = I18n.t('model.found.failure', model_name: 'Resume')
         return false
@@ -29,7 +30,7 @@ module ResumeService
     end
 
     def update_resume
-      if @resume.update(resume_params)
+      if @resume.update(parsed_resume_data)
         true
       else
         @message = I18n.t('model.update.failure', model_name: 'Resume')
@@ -47,7 +48,21 @@ module ResumeService
       params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
                     :years_of_experience, :link_to_file, :status,
                     primary_skills: [], secondary_skills: [], domain_expertise: [],
-                    matching_skills: [], missing_skills: [])
+                    matching_skills: [], missing_skills: [], parsed_data: {})
+    end
+
+    def parsed_resume_data
+      (resume_params[:parsed_data] || {}).slice(
+        :candidate_email,
+        :candidate_first_name,
+        :candidate_last_name,
+        :years_of_experience,
+        :primary_skills,
+        :secondary_skills,
+        :domain_expertise,
+        :matching_skills,
+        :missing_skills
+      )
     end
   end
 end

@@ -61,7 +61,7 @@ module JobDescriptionService
       result = JobDescriptionService::Create.new(merged_params, current_user).call
       if result[:success] && result[:data]
         # Enqueue background job for additional processing
-        JobDescriptionProcessingJob.perform_later(result[:data].object.id, result[:data].object.file_url)
+        JobDescriptionProcessingJob.perform_later(result[:data].object.id.to_s, result[:data].object.file_url)
       end
       result
     end

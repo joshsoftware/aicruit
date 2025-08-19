@@ -308,8 +308,8 @@ def process_jd_parse_and_callback(jd_id: str, file_url: str):
             return
         print(f"JD parse: rails_base_url={rails_base_url}")
 
-        # Note: routes.rb defines member put :update, so path is /job_descriptions/:id/update
-        url = f"{rails_base_url}/job_descriptions/{jd_id}/update"
+        # Note: routes.rb defines member put :update, so path is /job_descriptions/:id
+        url = f"{rails_base_url}/job_descriptions/{jd_id}"
         accept_header = os.getenv("RAILS_ACCEPT_HEADER")
         rails_api_token = os.getenv("RAILS_API_TOKEN")
         headers = {
@@ -706,7 +706,7 @@ def process_resume_parse_and_callback(resume_id: str, file_url: str):
             print("RAILS_API_BASE_URL is not set")
             return
 
-        url = f"{rails_base_url}/resumes/{resume_id}/update"
+        url = f"{rails_base_url}/resumes/{resume_id}"
         accept_header = os.getenv("RAILS_ACCEPT_HEADER")
         rails_api_token = os.getenv("RAILS_API_TOKEN")
         headers = {"Content-Type": "application/json"}

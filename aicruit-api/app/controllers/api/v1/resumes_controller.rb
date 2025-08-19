@@ -22,7 +22,7 @@ class Api::V1::ResumesController < ApplicationController
   end
 
   def update
-    result = ResumeService::Update.new(params).call
+    result = ResumeService::Update.new(params[:id], params[:resume]).call
 
     if result[:success]
       render json: result.to_h, status: :ok
