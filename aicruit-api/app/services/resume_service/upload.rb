@@ -61,7 +61,7 @@ module ResumeService
       result = ResumeService::Create.new(merged_params, current_user).call
       if result[:success] && result[:data]
         # Enqueue background job for additional processing
-        ResumeProcessingJob.perform_later(result[:data].object.id, result[:data].object.link_to_file)
+        ResumeProcessingJob.perform_later(result[:data].object.id.to_s, result[:data].object.link_to_file)
       end
       result
     end
