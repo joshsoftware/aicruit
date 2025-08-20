@@ -32,7 +32,7 @@ export interface GetPublishedJobDescriptionsResponse {
   message: string;
 }
 
-export async function getJobDescriptions(): Promise<GetJobDescriptionsResponse> {
+export async function getJobDescriptions(): Promise<T> {
   const state = store.getState();
   const token = state.auth.token;
   const response = await axiosInstance.get<GetJobDescriptionsResponse>(
@@ -80,7 +80,7 @@ export async function getJobDescriptionDetails(
 }
 
 export interface EditJobDescriptionFormData {
-  job_description: JobDescription;
+  job_description: Partial<JobDescription>;
 }
 
 export interface PutJobDescriptionVariables {

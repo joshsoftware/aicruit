@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useMemo } from "react";
-import { useJobDescriptionDetailsHook } from "@/services/JobDescription/hooks";
+import React, { useState, useEffect } from "react";
+import { useJobDescriptionDetailsHook, useModifyJobDescription } from "@/services/JobDescription/hooks";
 import JobDescriptionEditForm from "@/components/JobDescriptions/JobDescriptionEditForm";
 import JobDescriptionDetailsSkeleton from "@/components/JobDescriptions/JobDescriptionDetailsSkeleton";
 import FetchError from "@/components/ui/FetchError";
@@ -32,6 +32,7 @@ const JobDescriptionDetailsContainer: React.FC<
     data: jobDescriptionDetails,
     isFetching,
     isError,
+    refetch,
   } = useJobDescriptionDetailsHook(jobId);
   const authUser = useAuthUser();
   const isCandidate = authUser?.roleName === UserRoles.CANDIDATE;
@@ -39,19 +40,56 @@ const JobDescriptionDetailsContainer: React.FC<
   const [isEditing, setIsEditing] = useState(false);
   const [sectionVisibility, setSectionVisibility] =
     useState<SectionVisibilityState>({});
+  const { isPending: isUpdatingStatus, modifyMutate } = useModifyJobDescription(jobId);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
-  useMemo(() => {
+  const allStatuses = ["draft", "unpublished", "published", "closed"] as const;
+  const availableStatuses = allStatuses.filter(
+    (s) => s !== (jobDescriptionDetails?.status as typeof allStatuses[number])
+  );
+
+  const handleStatusChange = (nextStatus: string) => {
+    if (!nextStatus || isUpdatingStatus) return;
+    modifyMutate({
+      jobId,
+      body: { job_description: { status: nextStatus } },
+    });
+    setStatusMenuOpen(false);
+  };
+
+  useEffect(() => {
     if (jobDescriptionDetails?.parsed_data) {
       setSectionVisibility(
-        Object.keys(
-          jobDescriptionDetails.parsed_data
-        ).reduce<SectionVisibilityState>(
+        Object.keys(jobDescriptionDetails.parsed_data).reduce<SectionVisibilityState>(
           (acc, key) => ({ ...acc, [key]: true }),
           {}
         )
       );
     }
-  }, [jobDescriptionDetails]);
+  }, [jobDescriptionDetails?.parsed_data]);
+
+  useEffect(() => {
+    const handlePageShow = (e: any) => {
+      if (e && (e as any).persisted) {
+        refetch();
+      }
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refetch();
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("pageshow", handlePageShow);
+      document.addEventListener("visibilitychange", handleVisibility);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("pageshow", handlePageShow);
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+    };
+  }, [refetch]);
 
   const toggleSectionVisibility = (sectionKey: string) => {
     setSectionVisibility((prev) => ({
@@ -96,6 +134,37 @@ const JobDescriptionDetailsContainer: React.FC<
             isCandidate={isCandidate}
           />
           <div className="p-6 space-y-4">
+            {!isCandidate && (
+              <div className="flex justify-end mb-4">
+                <div className="relative inline-block text-left">
+                  <button
+                    type="button"
+                    onClick={() => setStatusMenuOpen((prev) => !prev)}
+                    disabled={isUpdatingStatus}
+                    className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {isUpdatingStatus ? "Updating..." : "Change status"}
+                  </button>
+                  {statusMenuOpen && (
+                    <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                      <div className="py-1" role="menu" aria-orientation="vertical">
+                        {availableStatuses.map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => handleStatusChange(s)}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            role="menuitem"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             {sectionKeys.map((key) => {
               const isVisible = sectionVisibility[key];
               const sectionData = jobDescriptionDetails.parsed_data[key];
