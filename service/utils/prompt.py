@@ -216,7 +216,11 @@ PARSE_JD_PROMPT = """
 """
 
 
-PARSE_RESUME_PROMPT="""
+PARSE_RESUME_PROMPT = """
+IMPORTANT RULE:
+    - Do NOT guess or fabricate candidate_email.
+    - Only include candidate_email if it is explicitly present in the resume text.
+    - If no valid email is found, set candidate_email to null.
 You are a resume parser. Extract the following fields in JSON ONLY:
 - candidate_email
 - candidate_first_name
@@ -230,6 +234,7 @@ Resume text:
 
 Return STRICTLY valid JSON, no explanations.
 """
+
 
 PARSE_NEWJD_PROMPT="""
 You are an expert job description parser. Parse this JD systematically.
