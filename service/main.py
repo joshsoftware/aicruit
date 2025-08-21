@@ -728,7 +728,6 @@ def process_resume_parse_and_callback(resume_id: str, file_url: str):
 
         response = requests.put(url, json=payload, headers=headers, timeout=30)
         print(f"Rails update responded with {response.status_code}: {response.text}")
-        print(f"Resume parse: completed id={resume_id}")
 
     except Exception as e:
         print(f"Error in process_resume_parse_and_callback: {e}")
