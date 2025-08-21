@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useJobDescriptionDetailsHook, useModifyJobDescription } from "@/services/JobDescription/hooks";
 import JobDescriptionEditForm from "@/components/JobDescriptions/JobDescriptionEditForm";
 import JobDescriptionDetailsSkeleton from "@/components/JobDescriptions/JobDescriptionDetailsSkeleton";
@@ -50,6 +51,7 @@ const JobDescriptionDetailsContainer: React.FC<
   JobDescriptionDetailsContainerProps
 > = ({ params: { job_description_id } }) => {
   const jobId = Number(job_description_id);
+  const router = useRouter();
   const {
     data: jobDescriptionDetails,
     isFetching,
@@ -272,7 +274,10 @@ const JobDescriptionDetailsContainer: React.FC<
             {isCandidate && (
               <div className="mt-6 border-t pt-6">
                 <div className="flex justify-center">
-                  <button className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
+                  <button
+                    onClick={() => router.push(`/job-description/${jobId}/upload-resume`)}
+                    className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105"
+                  >
                     Upload your resume
                   </button>
                 </div>

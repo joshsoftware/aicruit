@@ -5,6 +5,10 @@ export const enum ApiRoute {
   JobDescriptionsUpload = "/job_descriptions/upload",
   PublishedJobDescriptions = "/job_descriptions/published",
   ParseJobDescription = "/parse-job-description",
+  // Resume endpoints
+  Resumes = "/resumes",
+  ResumeUpload = "/resumes/upload",
+  ParseResume = "/parse-resume",
 }
 
 export const BrowserRoute = {
