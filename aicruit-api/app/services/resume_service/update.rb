@@ -30,7 +30,7 @@ module ResumeService
     end
 
     def update_resume
-      if @resume.update(parsed_resume_data)
+      if @resume.update(resume_params)
         true
       else
         @message = I18n.t('model.update.failure', model_name: 'Resume')
@@ -45,24 +45,13 @@ module ResumeService
     end
 
     def resume_params
-      params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
-                    :years_of_experience, :link_to_file, :status,
-                    primary_skills: [], secondary_skills: [], domain_expertise: [],
-                    matching_skills: [], missing_skills: [], parsed_data: {})
-    end
+      permitted = params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
+                                :years_of_experience, :link_to_file, :status,
+                                primary_skills: [], secondary_skills: [], domain_expertise: [],
+                                matching_skills: [], missing_skills: [], parsed_data: {})
 
-    def parsed_resume_data
-      (resume_params[:parsed_data] || {}).slice(
-        :candidate_email,
-        :candidate_first_name,
-        :candidate_last_name,
-        :years_of_experience,
-        :primary_skills,
-        :secondary_skills,
-        :domain_expertise,
-        :matching_skills,
-        :missing_skills
-      )
+      parsed_data = (permitted[:parsed_data] || {}).reject { |_k, v| v.blank? }
+      permitted.merge(parsed_data)
     end
   end
 end
