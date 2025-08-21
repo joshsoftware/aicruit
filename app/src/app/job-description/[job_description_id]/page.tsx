@@ -24,6 +24,28 @@ interface JobDescriptionDetailsContainerProps {
 const formatSectionTitle = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+const isNil = (v: any): boolean => v === null || v === undefined;
+
+const isEmptyValue = (v: any): boolean => {
+  if (isNil(v)) return true;
+  if (typeof v === "string") return v.trim().length === 0;
+  if (Array.isArray(v)) return v.length === 0; // keep arrays non-empty if they have any items
+  if (typeof v === "object") {
+    // An object is empty if it has no keys OR all of its values are empty
+    const entries = Object.entries(v);
+    if (entries.length === 0) return true;
+    return entries.every(([, val]) => isEmptyValue(val));
+  }
+  return false;
+};
+
+const renderValue = (v: any): React.ReactNode => {
+  if (isNil(v)) return null;
+  if (Array.isArray(v)) return v.join(", ");
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+};
+
 const JobDescriptionDetailsContainer: React.FC<
   JobDescriptionDetailsContainerProps
 > = ({ params: { job_description_id } }) => {
@@ -58,13 +80,16 @@ const JobDescriptionDetailsContainer: React.FC<
   };
 
   useEffect(() => {
-    if (jobDescriptionDetails?.parsed_data) {
-      setSectionVisibility(
-        Object.keys(jobDescriptionDetails.parsed_data).reduce<SectionVisibilityState>(
-          (acc, key) => ({ ...acc, [key]: true }),
-          {}
-        )
-      );
+    const pd = jobDescriptionDetails?.parsed_data;
+    if (pd) {
+      const initial = Object.keys(pd).reduce<SectionVisibilityState>((acc, key) => {
+        const val = (pd as any)[key];
+        if (!isEmptyValue(val)) {
+          acc[key] = true;
+        }
+        return acc;
+      }, {});
+      setSectionVisibility(initial);
     }
   }, [jobDescriptionDetails?.parsed_data]);
 
@@ -117,7 +142,9 @@ const JobDescriptionDetailsContainer: React.FC<
     );
   }
 
-  const sectionKeys = Object.keys(jobDescriptionDetails.parsed_data).sort();
+  const sectionKeys = Object.keys(jobDescriptionDetails.parsed_data)
+    .filter((k) => !isEmptyValue((jobDescriptionDetails.parsed_data as any)[k]))
+    .sort();
 
   return (
     <>
@@ -166,7 +193,7 @@ const JobDescriptionDetailsContainer: React.FC<
               </div>
             )}
             {sectionKeys.map((key) => {
-              const isVisible = sectionVisibility[key];
+              const isVisible = sectionVisibility[key] ?? true;
               const sectionData = jobDescriptionDetails.parsed_data[key];
 
               return (
@@ -198,7 +225,7 @@ const JobDescriptionDetailsContainer: React.FC<
                       className="border-t p-4 bg-gray-50"
                     >
                       <ul className="space-y-3">
-                        {Array.isArray(sectionData) &&
+                        {Array.isArray(sectionData) ? (
                           sectionData.map((item, idx) => (
                             <li
                               key={idx}
@@ -206,10 +233,36 @@ const JobDescriptionDetailsContainer: React.FC<
                             >
                               <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
                               <span className="text-base text-gray-900">
-                                {item}
+                                {renderValue(item)}
                               </span>
                             </li>
-                          ))}
+                          ))
+                        ) : typeof sectionData === "object" && sectionData !== null ? (
+                          Object.entries(sectionData)
+                            .filter(([, val]) => !isEmptyValue(val))
+                            .map(([subKey, val], idx) => (
+                              <li
+                                key={subKey}
+                                className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                              >
+                                <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
+                                <div className="text-base text-gray-900">
+                                  <span className="font-medium">{formatSectionTitle(subKey)}: </span>
+                                  <span>{renderValue(val)}</span>
+                                </div>
+                              </li>
+                            ))
+                        ) : !isEmptyValue(sectionData) ? (
+                          <li
+                            key="value"
+                            className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                          >
+                            <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
+                            <span className="text-base text-gray-900">
+                              {renderValue(sectionData)}
+                            </span>
+                          </li>
+                        ) : null}
                       </ul>
                     </motion.div>
                   )}
