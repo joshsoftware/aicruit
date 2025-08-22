@@ -2,12 +2,12 @@
 
 module ResumeService
   class Update < Base
-    attr_reader :params, :current_user, :resume
+    attr_reader :id, :params, :resume
 
-    def initialize(params, current_user)
+    def initialize(id, params)
       super()
+      @id = id
       @params = params
-      @current_user = current_user
     end
 
     def call
@@ -21,7 +21,7 @@ module ResumeService
     private
 
     def find_resume
-      @resume = Resume.find_by(id: params[:id], company_id: current_user.company_id)
+      @resume = Resume.find_by(id:)
       unless @resume
         @message = I18n.t('model.found.failure', model_name: 'Resume')
         return false
@@ -45,10 +45,13 @@ module ResumeService
     end
 
     def resume_params
-      params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
-                    :years_of_experience, :link_to_file, :status,
-                    primary_skills: [], secondary_skills: [], domain_expertise: [],
-                    matching_skills: [], missing_skills: [])
+      permitted = params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
+                                :years_of_experience, :link_to_file, :status,
+                                primary_skills: [], secondary_skills: [], domain_expertise: [],
+                                matching_skills: [], missing_skills: [], parsed_data: {})
+
+      parsed_data = (permitted[:parsed_data] || {}).reject { |_k, v| v.blank? }
+      permitted.merge(parsed_data)
     end
   end
 end

@@ -26,7 +26,7 @@ class Api::V1::JobDescriptionsController < ApplicationController
   end
 
   def update
-    authorize! :update, JobDescription.find_by(id: params[:id])
+    authorize! :update, JobDescription.find_by(id: params[:id]), @current_service
     result = JobDescriptionService::Update.new(params[:id], params[:job_description]).call
     if result[:success]
       render json: result.to_h, status: :ok
@@ -58,6 +58,17 @@ class Api::V1::JobDescriptionsController < ApplicationController
   def published
     authorize! :read, JobDescription
     result = JobDescriptionService::PublishedJobDescriptions.new.call
+    if result[:success]
+      render json: result.to_h, status: :ok
+    else
+      render json: result.to_h, status: :unprocessable_entity
+    end
+  end
+
+  def upload
+    authorize! :create, JobDescription
+    result = JobDescriptionService::Upload.new(params, current_user).call
+
     if result[:success]
       render json: result.to_h, status: :ok
     else
