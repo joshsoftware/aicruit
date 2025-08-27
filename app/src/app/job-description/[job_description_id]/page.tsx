@@ -11,6 +11,7 @@ import { UserRoles } from "@/constants/constants";
 import JobDescriptionHeader from "@/components/JobDescriptions/JobDescriptionHeader";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import LocalStorage from "@/utils/localStore";
 
 interface SectionVisibilityState {
   [key: string]: boolean;
@@ -59,6 +60,9 @@ const JobDescriptionDetailsContainer: React.FC<
     refetch,
   } = useJobDescriptionDetailsHook(jobId);
   const authUser = useAuthUser();
+  
+  const storageKey = `jd-details-${jobId}`;
+  const [cachedDetails, setCachedDetails] = useState<any>(null);
   const isCandidate = authUser?.roleName === UserRoles.CANDIDATE;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -68,9 +72,11 @@ const JobDescriptionDetailsContainer: React.FC<
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
   const allStatuses = ["draft", "unpublished", "published", "closed"] as const;
+  const details = jobDescriptionDetails ?? cachedDetails;
   const availableStatuses = allStatuses.filter(
-    (s) => s !== (jobDescriptionDetails?.status as typeof allStatuses[number])
+    (s) => s !== (details?.status as typeof allStatuses[number])
   );
+  const totalApplicants = jobDescriptionDetails?.total_applicants ?? 0;
 
   const handleStatusChange = (nextStatus: string) => {
     if (!nextStatus || isUpdatingStatus) return;
@@ -118,12 +124,28 @@ const JobDescriptionDetailsContainer: React.FC<
     };
   }, [refetch]);
 
+  // Persist job description details to localStorage for use on subsequent pages
+  useEffect(() => {
+    try {
+      if (jobDescriptionDetails) {
+        LocalStorage.setItem(storageKey, JSON.stringify(jobDescriptionDetails));
+        setCachedDetails(jobDescriptionDetails);
+      } else if (!cachedDetails) {
+        const cached = LocalStorage.getItem(storageKey);
+        if (cached) setCachedDetails(JSON.parse(cached));
+      }
+    } catch (_e) {
+      // ignore localStorage errors (e.g., quota)
+    }
+  }, [jobDescriptionDetails, storageKey]);
+
   const toggleSectionVisibility = (sectionKey: string) => {
     setSectionVisibility((prev) => ({
       ...prev,
       [sectionKey]: !prev[sectionKey],
     }));
   };
+
 
   if (isFetching) return <JobDescriptionDetailsSkeleton />;
   if (isError) return <FetchError />;
@@ -151,7 +173,7 @@ const JobDescriptionDetailsContainer: React.FC<
   return (
     <>
       <div className="mt-4 px-6">
-        <NavigateBack />
+        <NavigateBack onBeforeBack={() => LocalStorage.removeItem(storageKey)} />
       </div>
       <div className="p-6 max-w-7xl mx-auto mt-10 space-y-6">
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
@@ -191,6 +213,26 @@ const JobDescriptionDetailsContainer: React.FC<
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+            {!isCandidate && (
+              <div className="mb-4">
+                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-gray-500">Total Applicants</div>
+                      <div className="text-2xl font-bold">{totalApplicants}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/job-description/${jobId}/applicants`)}
+                      disabled={totalApplicants === 0}
+                      className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      View Applicant Resumes
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
