@@ -33,6 +33,7 @@ Rails.application.routes.draw do
         put :update
         delete :destroy
         get :show
+        get :applicant_resumes
       end
     end
 

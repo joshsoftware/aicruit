@@ -7,6 +7,7 @@ class JobDescription < ApplicationRecord
 
   belongs_to :user
   belongs_to :company
+  has_many :resumes
 
   enum status: { draft: 0, unpublished: 1, published: 2, closed: 3 }
 

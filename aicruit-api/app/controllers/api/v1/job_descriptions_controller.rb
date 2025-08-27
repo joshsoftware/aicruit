@@ -65,6 +65,17 @@ class Api::V1::JobDescriptionsController < ApplicationController
     end
   end
 
+  def applicant_resumes
+    job = JobDescription.find_by(id: params[:id])
+    authorize! :read, job
+    result = JobDescriptionService::ApplicantResumes.new(job).call
+    if result[:success]
+      render json: result.to_h, status: :ok
+    else
+      render json: result.to_h, status: :unprocessable_entity
+    end
+  end
+
   def upload
     authorize! :create, JobDescription
     result = JobDescriptionService::Upload.new(params, current_user).call
