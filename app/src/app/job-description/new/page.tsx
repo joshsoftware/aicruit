@@ -1,5 +1,5 @@
 import JobDescriptionForm from "@/components/JobDescriptions/JobDescriptionForm";
-import NavigateBack from "@/components/NavigateBack";
+import NavigateBack from "@/components/ui/NavigateBack";
 
 export default function Page() {
   return (

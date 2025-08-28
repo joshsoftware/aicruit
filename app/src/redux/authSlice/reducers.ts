@@ -1,6 +1,7 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AuthState, UserAuthData } from "./types";
-import LocalStorage from "@/utils/localStore";
+import { AUTH_USER_COOKIE } from "@/constants/constants";
+import { clearCookie, storeCookie } from "@/utils/cookies";
 
 export function loadAuthReducer(
   state: AuthState,
@@ -10,15 +11,12 @@ export function loadAuthReducer(
   state.token = token;
   state.user = user;
 
-  LocalStorage.setItem(
-    LocalStorage.AUTH_USER_DATA,
-    JSON.stringify({ token, user })
-  );
+  storeCookie(AUTH_USER_COOKIE, JSON.stringify({ token, user }));
 }
 
 export function resetAuthReducer(state: AuthState) {
   state.token = null;
   state.user = null;
 
-  LocalStorage.removeItem(LocalStorage.AUTH_USER_DATA);
+  clearCookie(AUTH_USER_COOKIE);
 }

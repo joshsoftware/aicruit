@@ -1,12 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "./types";
 import { loadAuthReducer, resetAuthReducer } from "./reducers";
-import LocalStorage from "@/utils/localStore";
+import { fetchCookie } from "@/utils/cookies";
+import { AUTH_USER_COOKIE } from "@/constants/constants";
 
 const loadInitialState = (): AuthState => {
   try {
-    const storedAuth = LocalStorage.getItem(LocalStorage.AUTH_USER_DATA);
-    return storedAuth ? JSON.parse(storedAuth) : { token: null, user: null };
+    const storedAuth = fetchCookie(AUTH_USER_COOKIE);
+    return storedAuth
+      ? JSON.parse(storedAuth as string)
+      : { token: null, user: null };
   } catch (error) {
     console.error("Failed to load auth state", error);
     return { token: null, user: null };

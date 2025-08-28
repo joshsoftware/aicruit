@@ -45,7 +45,7 @@ export interface PostSignUpResponseData {
   success: true;
   data: {
     token: string;
-    doctor: {
+    user: {
       id: number;
       full_name: string;
       last_name: string;
