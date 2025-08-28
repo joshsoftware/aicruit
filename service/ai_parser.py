@@ -6,7 +6,7 @@ from typing import Dict
 from fuzzywuzzy import process
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.llms import Ollama   # ✅ for local model
-
+from utils.prompt import PARSE_NEWJD_PROMPT
 
 # =========================
 # Key Mapping Logic
@@ -52,30 +52,8 @@ def map_keys_semantically(parsed_json: Dict) -> Dict:
 API_URL = os.getenv("API_URL")
 API_KEY = os.getenv("API_KEY")
 
-automatic_prompt = ChatPromptTemplate.from_template(
-    """You are an expert job description parser. Parse this JD systematically.
-
-{jd_text}
-
-Return ONLY a JSON object in this format:
-{{
-  "title": null,
-  "company": null,
-  "company_description": null,
-  "experience_required": {{
-    "min_years": null,
-    "max_years": null
-  }},
-  "skills": {{
-    "must_have": ["skill1", "skill2"],
-    "good_to_have": ["skill1", "skill2"]
-  }},
-  "qualifications": ["degree1", "degree2"],
-  "responsibilities": ["resp1", "resp2"],
-  "location": null,
-  "employment_type": "Full-time"
-}}
-"""
+PARSE_NEWJD_PROMPT = ChatPromptTemplate.from_template(
+    PARSE_NEWJD_PROMPT
 )
 
 
@@ -93,7 +71,7 @@ def parse_jd_with_ai(jd_text: str) -> Dict:
         payload = {
             "model": "mistral:7b-instruct-q4_0",
             "messages": [
-                {"role": "user", "content": automatic_prompt.format(jd_text=jd_text)}
+                {"role": "user", "content": PARSE_NEWJD_PROMPT.format(jd_text=jd_text)}
             ]
         }
 
@@ -119,7 +97,7 @@ def parse_jd_with_ai(jd_text: str) -> Dict:
         print("⚡ Using local Ollama model")
         llm = Ollama(model="mistral:7b-instruct-q4_0")
         response_text = llm.invoke(
-            automatic_prompt.format(jd_text=jd_text)
+            PARSE_NEWJD_PROMPT.format(jd_text=jd_text)
         )
 
     # ========================

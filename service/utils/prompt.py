@@ -215,21 +215,38 @@ PARSE_JD_PROMPT = """
     Do not prefix or suffix the response with any text like "Here is the analysis."
 """
 
+PARSE_RESUME_PROMPT = """
+You are a resume parser. Extract the following fields as valid JSON ONLY.
+If not present, set to null (for single fields) or [] (for lists).
 
-PARSE_RESUME_PROMPT="""
-You are a resume parser. Extract the following fields in JSON ONLY:
-- candidate_email
-- candidate_first_name
-- candidate_last_name
-- primary_skills (list)
-- secondary_skills (list)
-- domain_expertise (list)
+Schema:
+{{
+  "candidate_email": string or null,
+  "candidate_first_name": string or null,
+  "candidate_last_name": string or null,
+  "primary_skills": [string],
+  "secondary_skills": [string],
+  "domain_expertise": [string]
+}}
+
+Rules:
+- Primary skills → Core technical & testing/automation skills (Manual Testing, Selenium, API Testing, Java, etc.)
+- Secondary skills → Supporting tools, methodologies, processes (Agile, Jira, Git, Jenkins, STLC, etc.)
+- Domain expertise → Industry domains (Banking, Healthcare, Insurance, CRM, E-commerce, etc.)
+- Do NOT guess or fabricate. If missing, set to null or [].
+- Always include ALL keys in the JSON (never omit keys).
+- Use concise tokens for list values, not sentences.
+- Output strictly valid JSON (no markdown, no code fences, no prose).
 
 Resume text:
 {text}
 
 Return STRICTLY valid JSON, no explanations.
 """
+
+
+
+
 
 PARSE_NEWJD_PROMPT="""
 You are an expert job description parser. Parse this JD systematically.
