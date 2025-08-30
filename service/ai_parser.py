@@ -8,6 +8,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.llms import Ollama   # ✅ for local model
 from utils.prompt import PARSE_NEWJD_PROMPT
 
+DEFAULT_MODEL = os.getenv("LLM_MODEL")
+
 # =========================
 # Key Mapping Logic
 # =========================
@@ -69,7 +71,7 @@ def parse_jd_with_ai(jd_text: str) -> Dict:
         # --------------------
         print("⚡ Using remote AI API")
         payload = {
-            "model": "mistral:7b-instruct-q4_0",
+            "model": DEFAULT_MODEL,
             "messages": [
                 {"role": "user", "content": PARSE_NEWJD_PROMPT.format(jd_text=jd_text)}
             ]
@@ -95,7 +97,7 @@ def parse_jd_with_ai(jd_text: str) -> Dict:
         # Local Ollama Mode
         # --------------------
         print("⚡ Using local Ollama model")
-        llm = Ollama(model="mistral:7b-instruct-q4_0")
+        llm = Ollama(model=DEFAULT_MODEL)
         response_text = llm.invoke(
             PARSE_NEWJD_PROMPT.format(jd_text=jd_text)
         )

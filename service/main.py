@@ -34,6 +34,7 @@ from typing import Optional, Dict
 import io
 from conversation_diarization.jd_parser import read_docx 
 from conversation_diarization.jd_interview_aligner import parse_jd_from_llm
+from matcher import match_resume_to_jd
 
 dbCursor = initDbConnection()
 import traceback
@@ -45,7 +46,7 @@ import requests
 import time
 from parse_s3_url import get_text_from_s3_file  # your helper module
 from fastapi import FastAPI, HTTPException
-from resume_parser import parse_resume
+from resume_parser import parse_resume_skills_experience_education
 app = FastAPI()
 
 # Load environment variables
@@ -302,26 +303,6 @@ def process_jd_parse_and_callback(jd_id: str, file_url: str):
         print("JD parse: AI parsing completed", parsed_data)
 
         # 3) Send parsed result back to Rails API
-        rails_base_url = os.getenv("RAILS_API_BASE_URL")
-        if not rails_base_url:
-            print("RAILS_API_BASE_URL is not set")
-            return
-        print(f"JD parse: rails_base_url={rails_base_url}")
-
-        # Note: routes.rb defines member put :update, so path is /job_descriptions/:id/update
-        url = f"{rails_base_url}/job_descriptions/{jd_id}"
-        accept_header = os.getenv("RAILS_ACCEPT_HEADER")
-        rails_api_token = os.getenv("RAILS_API_TOKEN")
-        headers = {
-            "Content-Type": "application/json",
-        }
-        if accept_header:
-            headers["Accept"] = accept_header
-        if rails_api_token:
-            # If token is provided, send as Bearer; otherwise no Authorization header
-            headers["Authorization"] = f"Bearer {rails_api_token}"
-        print(f"JD parse: request headers -> has_accept={bool(accept_header)}, has_auth={bool(rails_api_token)}")
-
         payload = {
             "job_description": {
                 "parsed_data": parsed_data
@@ -331,11 +312,14 @@ def process_jd_parse_and_callback(jd_id: str, file_url: str):
             payload_size = len(json.dumps(payload))
         except Exception:
             payload_size = -1
-        print(f"JD parse: PUT {url} with payload_size={payload_size}")
+        print(f"JD parse: payload_size={payload_size}")
 
-        response = requests.put(url, json=payload, headers=headers, timeout=30)
-        print(f"Rails update responded with {response.status_code}: {response.text}")
-        print(f"JD parse: completed id={jd_id}")
+        # Send data to Rails API using the shared function
+        success = send_data_to_rails_api(payload, "job_description")
+        if success:
+            print(f"JD parse: completed successfully id={jd_id}")
+        else:
+            print(f"JD parse: failed to send data to Rails API id={jd_id}")
 
     except Exception as e:
         print(f"Error in process_jd_parse_and_callback: {e}")
@@ -669,10 +653,56 @@ async def parse_resume_api(request_body: ResumeRequest, request: Request, backgr
             }
         )
 
-
-def process_resume_parse_and_callback(resume_id: str, file_url: str):
+def send_data_to_rails_api(payload: dict, endpoint_type: str = "resume") -> bool:
+    """Send data to Rails API and return success status"""
     try:
-        print(f"Resume parse: start background task id={resume_id}, file_url={file_url}")
+        rails_base_url = os.getenv("RAILS_API_BASE_URL")
+        if not rails_base_url:
+            print("RAILS_API_BASE_URL is not set")
+            return False
+
+        # Get endpoint from environment variables
+        if endpoint_type == "resume":
+            endpoint = os.getenv("RAILS_RESUME_ENDPOINT", "/resumes")
+            method = "POST"
+        elif endpoint_type == "job_description":
+            endpoint = os.getenv("RAILS_JD_ENDPOINT", "/job_descriptions")
+            method = "PUT"
+        else:
+            print(f"Unknown endpoint type: {endpoint_type}")
+            return False
+
+        url = f"{rails_base_url}{endpoint}"
+        accept_header = os.getenv("RAILS_ACCEPT_HEADER")
+        rails_api_token = os.getenv("RAILS_API_TOKEN")
+        headers = {"Content-Type": "application/json"}
+        if accept_header:
+            headers["Accept"] = accept_header
+        if rails_api_token:
+            headers["Authorization"] = f"Bearer {rails_api_token}"
+
+        print(f"Rails API: {method} {url} with headers -> has_accept={bool(accept_header)}, has_auth={bool(rails_api_token)}")
+        
+        if method.upper() == "PUT":
+            response = requests.put(url, json=payload, headers=headers)
+        elif method.upper() == "POST":
+            response = requests.post(url, json=payload, headers=headers)
+        else:
+            print(f"Unsupported HTTP method: {method}")
+            return False
+            
+        print(f"Rails API responded with {response.status_code}: {response.text}")
+        
+        return response.status_code == 200 or response.status_code == 201
+        
+    except Exception as e:
+        print(f"Error sending data to Rails API: {e}")
+        return False
+
+def process_resume_parse_and_callback(jd_id: str, file_url: str):
+    try:
+        print(f"Resume parse: start background task jd_id={jd_id}, file_url={file_url}")
+        
         # 1) Download and extract text
         resume_text = get_text_from_s3_file(file_url)
         if not resume_text:
@@ -687,7 +717,8 @@ def process_resume_parse_and_callback(resume_id: str, file_url: str):
         parsed_data = None
         while attempt <= max_retries:
             attempt += 1
-            parsed_data = parse_resume(resume_text)
+            parsed_data = parse_resume_skills_experience_education(resume_text)
+            print(parsed_data)
             if parsed_data and not parsed_data.get("error"):
                 break
             print(f"Resume parse: parsing failed (attempt {attempt}/{max_retries}). error={parsed_data.get('error') if parsed_data else 'unknown'}")
@@ -700,34 +731,37 @@ def process_resume_parse_and_callback(resume_id: str, file_url: str):
 
         print("Resume parse: AI parsing completed", parsed_data)
 
-        # 3) Send parsed result back to Rails API
-        rails_base_url = os.getenv("RAILS_API_BASE_URL")
-        if not rails_base_url:
-            print("RAILS_API_BASE_URL is not set")
-            return
+        # 3) Call matcher with parsed resume data and JD ID
+        try:
+            print("Calling matcher with resume data and JD ID...")
+            match_result = match_resume_to_jd(parsed_data, jd_id)
+            print(f"Matcher result: {match_result}")
+            
+        except Exception as e:
+            print(f"Error in matching process: {e}")
+            match_result = None
 
-        url = f"{rails_base_url}/resumes/{resume_id}"
-        accept_header = os.getenv("RAILS_ACCEPT_HEADER")
-        rails_api_token = os.getenv("RAILS_API_TOKEN")
-        headers = {"Content-Type": "application/json"}
-        if accept_header:
-            headers["Accept"] = accept_header
-        if rails_api_token:
-            headers["Authorization"] = f"Bearer {rails_api_token}"  # Bearer token if provided
-
+        # 4) Create payload and send to Rails API
         payload = {
             "resume": {
-                "parsed_data": parsed_data
+                "parsed_data": parsed_data,
+                "matching_result": match_result,
+                "job_description_id": jd_id
             }
         }
+        
         try:
             payload_size = len(json.dumps(payload))
         except Exception:
             payload_size = -1
-        print(f"Resume parse: PUT {url} with payload_size={payload_size}")
+        print(f"Resume parse: payload_size={payload_size}")
 
-        response = requests.put(url, json=payload, headers=headers, timeout=30)
-        print(f"Rails update responded with {response.status_code}: {response.text}")
+        # Send data to Rails API using the new function
+        success = send_data_to_rails_api(payload)
+        if success:
+            print("Successfully sent data to Rails API")
+        else:
+            print("Failed to send data to Rails API")
 
     except Exception as e:
         print(f"Error in process_resume_parse_and_callback: {e}")
