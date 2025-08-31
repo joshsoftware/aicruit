@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_02_18_085133) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_20_054207) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,7 +30,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_18_085133) do
     t.bigint "company_id", null: false
     t.string "title"
     t.string "file_url"
-    t.jsonb "parsed_data"
+    t.jsonb "parsed_data", default: {}
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -57,6 +57,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_18_085133) do
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "parsed_data", default: {}
     t.index ["candidate_email", "job_description_id"], name: "index_resumes_on_candidate_email_and_job_description_id", unique: true
     t.index ["company_id"], name: "index_resumes_on_company_id"
     t.index ["job_description_id"], name: "index_resumes_on_job_description_id"

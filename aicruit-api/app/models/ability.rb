@@ -3,9 +3,10 @@
 class Ability
   include CanCan::Ability
 
-  def initialize(user)
+  def initialize(user, service = nil)
     @user = user || User.new
     send @user.role.name.downcase.gsub(' ', '_') unless @user.role.nil?
+    send service.downcase.gsub(' ', '_') unless service.nil?
   end
 
   def super_admin
@@ -22,5 +23,10 @@ class Ability
 
   def hr
     can :read, JobDescription
+  end
+
+  def python_service
+    can :update, JobDescription
+    can :update, Resume
   end
 end

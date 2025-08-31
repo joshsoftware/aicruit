@@ -12,6 +12,7 @@ export interface JobDescription {
   parsed_data: ParsedData;
   status: string;
   published_at?: string;
+  total_applicants?: number;
 }
 export interface publishedJobDescription {
   id: string;
@@ -35,21 +36,21 @@ export interface GetPublishedJobDescriptionsResponse {
 export async function getJobDescriptions(): Promise<GetJobDescriptionsResponse> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.get<GetJobDescriptionsResponse>(
+  const response = await axiosInstance.get(
     ApiRoute.JobDescriptions,
     {
       headers: { Authorization: token },
     }
   );
 
-  return response.data;
+  return response.data as GetJobDescriptionsResponse;
 }
 
 export async function getPublishedJobDescriptions(): Promise<GetPublishedJobDescriptionsResponse> {
-  const response = await axiosInstance.get<GetPublishedJobDescriptionsResponse>(
+  const response = await axiosInstance.get(
     ApiRoute.PublishedJobDescriptions
   );
-  return response.data;
+  return response.data as GetPublishedJobDescriptionsResponse;
 }
 
 export interface GetJobDescriptionDetailsResponse {
@@ -80,7 +81,7 @@ export async function getJobDescriptionDetails(
 }
 
 export interface EditJobDescriptionFormData {
-  job_description: JobDescription;
+  job_description: Partial<JobDescription>;
 }
 
 export interface PutJobDescriptionVariables {
@@ -166,7 +167,7 @@ export async function deleteJobDescription(
 ): Promise<DeleteJobDescriptionResponseData> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.delete<DeleteJobDescriptionResponseData>(
+  const response = await axiosInstance.delete(
     ApiRoute.JobDescriptions + `/${id}`,
     {
       headers: {
@@ -175,5 +176,25 @@ export async function deleteJobDescription(
     }
   );
 
-  return response.data;
+  return response.data as DeleteJobDescriptionResponseData;
+}
+
+export interface GetApplicantResumesResponse {
+  success: boolean;
+  data: any;
+  message: string;
+}
+
+export async function getApplicantResumes(
+  id: number
+): Promise<GetApplicantResumesResponse> {
+  const state = store.getState();
+  const token = state.auth.token;
+  const response = await axiosInstance.get(
+    `${ApiRoute.JobDescriptions}/${id}${ApiRoute.ApplicantResumesSuffix}`,
+    {
+      headers: { Authorization: token },
+    }
+  );
+  return response.data as GetApplicantResumesResponse;
 }

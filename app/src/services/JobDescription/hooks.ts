@@ -9,19 +9,26 @@ import {
   putJobDescription,
 } from "./api";
 import { useRouter } from "next/navigation";
-import { handleErrorResponse, pythonAxiosInstance } from "@/utils/axios";
+import axiosInstance, { handleErrorResponse, pythonAxiosInstance } from "@/utils/axios";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ApiRoute } from "@/constants/route";
+import store from "@/redux/store";
 
 export function useGetJobDescriptions() {
+  const token = store.getState().auth.token;
   const {
     data: jobDescriptionsData,
     isLoading: isLoadingJobDescriptions,
     isError: isErrorJobDescriptions,
   } = useQuery({
-    queryKey: ["get-job-descriptions"],
+    queryKey: ["get-job-descriptions", token],
     queryFn: getJobDescriptions,
+    enabled: !!token,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0,
   });
 
   const {
@@ -31,6 +38,10 @@ export function useGetJobDescriptions() {
   } = useQuery({
     queryKey: ["get-published-jobdescriptions"],
     queryFn: getPublishedJobDescriptions,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0,
   });
 
   const jobDescriptions = jobDescriptionsData?.data || [];
@@ -49,9 +60,15 @@ export function useGetJobDescriptions() {
 }
 
 export const useJobDescriptionDetailsHook = (id: number) => {
-  const { isPending, isError, data, isFetching } = useQuery({
-    queryKey: ["jobdescription-detail", id],
+  const token = store.getState().auth.token;
+  const { isPending, isError, data, isFetching, refetch } = useQuery({
+    queryKey: ["jobdescription-detail", id, token],
     queryFn: () => getJobDescriptionDetails(id),
+    enabled: !!id && !!token,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0,
   });
 
   const jobDescriptionDetails = data?.data;
@@ -61,6 +78,7 @@ export const useJobDescriptionDetailsHook = (id: number) => {
     isError,
     data: jobDescriptionDetails,
     isFetching,
+    refetch,
   };
 };
 
@@ -154,7 +172,7 @@ interface JobDescriptionPayload {
 
 export function useParseJobDescription() {
   const [isJobCreating, setIsJobCreating] = useState(false);
-  const { sendCreateJobDescriptionRequest } = useCreateJobDesciption();
+  const router = useRouter();
 
   const sendParseJobDescriptionRequest = async (
     payload: JobDescriptionPayload
@@ -162,29 +180,66 @@ export function useParseJobDescription() {
     try {
       setIsJobCreating(true);
 
-      const formData = new FormData();
-      formData.append("title", payload.title);
-
+      // If a file is provided, directly call the second API with multipart/form-data
       if (payload.jd_file) {
-        formData.append("jd_file", payload.jd_file);
-      } else if (payload.file_url) {
-        formData.append("file_url", payload.file_url);
+        const formData = new FormData();
+        formData.append("job_description[title]", payload.title);
+        formData.append("pdf_file", payload.jd_file);
+
+        const state = store.getState();
+        const token = state.auth.token;
+
+        await axiosInstance.post(ApiRoute.JobDescriptionsUpload, formData, {
+          headers: {
+            Authorization: token,
+            // Let the browser set the correct multipart boundary
+          },
+        });
+
+        toast.success("Job description added successfully");
+        router.push("/job-description");
+        return;
       }
 
-      //  Parsing data from python job-Description api
-      const response = await pythonAxiosInstance.post(
-        ApiRoute.ParseJobDescription,
-        formData
-      );
+      // Fallback for URL-based uploads: keep existing two-step behavior
+      if (payload.file_url) {
+        const formData = new FormData();
+        formData.append("title", payload.title);
+        formData.append("file_url", payload.file_url);
 
-      const parsedDataRecieved = response?.data?.data;
+        //  Parsing data from python job-Description api
+        const response = await pythonAxiosInstance.post(
+          ApiRoute.ParseJobDescription,
+          formData
+        );
 
-      sendCreateJobDescriptionRequest({
-        title: parsedDataRecieved.title,
-        parsed_data: parsedDataRecieved.parsed_data,
-      });
+        const parsedDataRecieved = response?.data?.data;
 
-      toast.success("Job description successfully submitted");
+        // Post the parsed data to create the job description
+        const state = store.getState();
+        const token = state.auth.token;
+        await axiosInstance.post(
+          ApiRoute.JobDescriptions,
+          {
+            job_description: {
+              title: parsedDataRecieved.title,
+              parsed_data: parsedDataRecieved.parsed_data,
+            },
+          },
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        toast.success("Job description successfully submitted");
+        router.push("/job-description");
+        return;
+      }
+
+      // If neither file nor URL provided, throw an error
+      throw new Error("Please provide a file or a URL");
     } catch (error) {
       handleErrorResponse(error);
     } finally {

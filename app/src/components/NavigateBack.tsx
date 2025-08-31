@@ -7,13 +7,19 @@ import { ArrowLeftIcon } from "lucide-react";
 interface NavigateBackProps {
   href?: string;
   subHeading?: string;
+  onBeforeBack?: () => void;
 }
 
 const NavigateBack = (props: NavigateBackProps) => {
-  const { href, subHeading } = props;
+  const { href, subHeading, onBeforeBack } = props;
   const router = useRouter();
 
   const handleBack = () => {
+    try {
+      onBeforeBack?.();
+    } catch (e) {
+      // ignore errors from onBeforeBack to not block navigation
+    }
     href ? router.push(href) : router.back();
   };
 
@@ -21,7 +27,7 @@ const NavigateBack = (props: NavigateBackProps) => {
     <div className="flex max-sm:flex-col justify-between max-sm:items-start items-center w-full max-sm:gap-2 ">
       <Button
         className="flex gap-4 bg-slate-200"
-        variant={"ghost"}
+        variant="ghost"
         onClick={handleBack}
       >
         <ArrowLeftIcon className="w-6 h-6" />

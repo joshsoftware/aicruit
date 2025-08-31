@@ -36,7 +36,8 @@ module JobDescriptionService
 
       merged_params = permitted_params.merge(
         user_id: current_user.id,
-        company_id: current_user.company_id
+        company_id: current_user.company_id,
+        file_url: params[:file_url]
       )
 
       @job_description = JobDescription.new(merged_params)
