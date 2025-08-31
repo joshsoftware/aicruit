@@ -21,7 +21,7 @@ DEFAULT_MODEL = os.getenv("LLM_MODEL")
 SCHEMA = {
     "type": "object",
     "properties": {
-        "match_score": {"type": "integer"},
+        "match_score": {"type": "number"},
         "reasoning": {"type": "array", "items": {"type": "string"}},
         "matched_skills": {
             "type": "object",

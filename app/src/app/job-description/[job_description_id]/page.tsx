@@ -160,7 +160,7 @@ const JobDescriptionDetailsContainer: React.FC<
   return (
     <>
       <div className="mt-4 px-6">
-        <NavigateBack href="/job-description" />
+        <NavigateBack href={isCandidate ? "/published-job-descriptions" : "/job-description"} />
       </div>
       <div className="p-6 max-w-7xl mx-auto mt-10 space-y-6">
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">

@@ -3,11 +3,11 @@
 class ResumeProcessingJob < ApplicationJob
   queue_as :default
 
-  def perform(resume_id, resume_url)
+  def perform(jd_id, resume_id, resume_url)
     url = ENV.fetch('PYTHON_DOMAIN', 'http://127.0.0.1:8000')
     resource_url = ENV.fetch('PYTHON_RESUME_PARSE', nil)
     action = 'post'
-    params_or_data = { id: resume_id, file_url: resume_url }
+    params_or_data = { job_description_id: jd_id, id: resume_id, file_url: resume_url }
     ExternalService::HttpRequest.new(url, action, resource_url, params_or_data).call
   end
 end

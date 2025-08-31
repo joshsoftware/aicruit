@@ -23,12 +23,11 @@ export default function ResumeForm({ jobId }: Props) {
     const [candidateEmail, setCandidateEmail] = useState("");
     const [candidateFirstName, setCandidateFirstName] = useState("");
     const [candidateLastName, setCandidateLastName] = useState("");
-    const [companyId, setCompanyId] = useState("");
 
     const emailValid = candidateEmail ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidateEmail) : false;
     const filePathRequiresCandidate = uploadType === "file";
     const formValid = filePathRequiresCandidate
-        ? !!resumeFile && !!candidateFirstName && !!candidateLastName && !!candidateEmail && emailValid && !!companyId
+        ? !!resumeFile && !!candidateFirstName && !!candidateLastName && !!candidateEmail && emailValid
         : !!fileUrl;
 
     const handleUploadTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +62,6 @@ export default function ResumeForm({ jobId }: Props) {
             candidate_email: uploadType === "file" ? candidateEmail : undefined,
             candidate_first_name: uploadType === "file" ? candidateFirstName : undefined,
             candidate_last_name: uploadType === "file" ? candidateLastName : undefined,
-            company_id: uploadType === "file" ? companyId : undefined,
         });
     };
 
@@ -162,17 +160,6 @@ export default function ResumeForm({ jobId }: Props) {
                                 {!emailValid && candidateEmail && (
                                     <span className="text-xs text-red-500">Please enter a valid email address</span>
                                 )}
-                            </label>
-                            <label className="block text-black-secondary font-medium">
-                                Company ID
-                                <input
-                                    type="text"
-                                    value={companyId}
-                                    onChange={(e) => setCompanyId(e.target.value)}
-                                    placeholder="Enter company id"
-                                    className="px-3 py-2 border rounded-lg w-full"
-                                    inputMode="numeric"
-                                />
                             </label>
                         </div>
                     )}

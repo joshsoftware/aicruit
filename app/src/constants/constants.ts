@@ -20,6 +20,7 @@ export const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 export const AUTH_USER_COOKIE = "auth_user_data";
 
 export const RESUME_STATUS_CLASSES = {
+  PROCESSING: "px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800",
   APPLIED: "px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800",
   SHORTLISTED: "px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800",
   REJECTED: "px-2 py-1 text-xs rounded-full bg-red-100 text-red-800",

@@ -29,7 +29,7 @@ module ResumeService
     end
 
     def set_resumes
-      @resumes = Resume.where(company_id: current_user.company_id).order(rating: :desc)
+      @resumes = Resume.where(company_id: current_user.company_id).order(matching_score: :desc)
       @resumes = @resumes.where(job_description_id: params[:job_description_id]) if params[:job_description_id].present?
 
       if params[:search_key].present?
@@ -39,16 +39,15 @@ module ResumeService
           key: key
         )
       end
-      
+
       if params[:sort_key].present?
-        sort_field, sort_dir = params[:sort_key].split("_")
+        sort_field, sort_dir = params[:sort_key].split('_')
 
         sort_column_map = {
-          "firstname" => "candidate_first_name",
-          "lastname" => "candidate_last_name",
-          "email" => "candidate_email",
-          "experience" => "years_of_experience",
-          "status" => "status"
+          'firstname' => 'candidate_first_name',
+          'lastname' => 'candidate_last_name',
+          'email' => 'candidate_email',
+          'status' => 'status'
         }
 
         if sort_column_map.key?(sort_field) && %w[asc desc].include?(sort_dir)

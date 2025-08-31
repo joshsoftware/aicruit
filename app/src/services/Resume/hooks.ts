@@ -11,7 +11,6 @@ export interface ResumePayload {
     candidate_email?: string;
     candidate_first_name?: string;
     candidate_last_name?: string;
-    company_id?: string;
 }
 
 export function useUploadResume() {
@@ -29,7 +28,6 @@ export function useUploadResume() {
                     candidate_email: payload.candidate_email || "",
                     candidate_first_name: payload.candidate_first_name || "",
                     candidate_last_name: payload.candidate_last_name || "",
-                    company_id: payload.company_id || "",
                 });
                 toast.success("Resume uploaded successfully");
                 router.push(`/job-description/${payload.job_description_id}`);

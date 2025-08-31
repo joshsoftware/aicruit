@@ -45,13 +45,9 @@ module ResumeService
     end
 
     def resume_params
-      permitted = params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
-                                :years_of_experience, :link_to_file, :status, :candidate_mobile_no, :rating,
-                                primary_skills: [], secondary_skills: [], domain_expertise: [],
-                                matching_skills: [], missing_skills: [], parsed_data: {})
-
-      parsed_data = (permitted[:parsed_data] || {}).reject { |_k, v| v.blank? }
-      permitted.merge(parsed_data)
+      params.permit(:candidate_email, :candidate_first_name, :candidate_last_name,
+                    :link_to_file, :status, :candidate_mobile_no,
+                    :years_of_experience, matching_result: {}, parsed_data: {})
     end
   end
 end

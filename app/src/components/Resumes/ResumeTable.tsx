@@ -30,6 +30,8 @@ const ResumeTable = ({
 
   const getStatusClasses = (status: string) => {
     switch (status.toLowerCase()) {
+      case "processing":
+        return RESUME_STATUS_CLASSES.PROCESSING;
       case "applied":
         return RESUME_STATUS_CLASSES.APPLIED;
       case "shortlisted":
@@ -90,7 +92,7 @@ const ResumeTable = ({
               scope="col"
               className="px-6 py-2 text-left text-sm font-medium text-gray-dark"
             >
-              Rating
+              Matching Score
             </th>
             <th
               scope="col"
@@ -132,17 +134,17 @@ const ResumeTable = ({
                     <div className="w-full h-2 rounded bg-gray-200">
                       <div
                         className={`h-full rounded transition-all duration-300 ${
-                          Number(resume.rating) >= 75
+                          Number(resume.matching_score) >= 75
                             ? "bg-green-500"
-                            : Number(resume.rating) >= 50
+                            : Number(resume.matching_score) >= 50
                             ? "bg-yellow-500"
                             : "bg-red-500"
                         }`}
-                        style={{ width: `${resume.rating}%` }}
+                        style={{ width: `${resume.matching_score}%` }}
                       />
                     </div>
                     <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
-                      {resume.rating}%
+                      {resume.matching_score}
                     </span>
                   </div>
                 </td>

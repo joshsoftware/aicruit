@@ -11,16 +11,11 @@ export interface Resume {
   candidate_email: string;
   candidate_first_name: string;
   candidate_last_name: string;
-  primary_skills: string[];
-  secondary_skills: string[];
-  domain_expertise: string[];
-  matching_skills: string[];
-  missing_skills: string[];
   years_of_experience: number;
   link_to_file: string;
   referred_by: string;
   status: string;
-  rating: string;
+  matching_score: string;
   candidate_mobile_no: string;
 }
 
@@ -102,7 +97,6 @@ export async function postResumeFileUpload(payload: {
     candidate_email: string;
     candidate_first_name: string;
     candidate_last_name: string;
-    company_id: string;
 }): Promise<PostResumeUploadResponse> {
     const formData = new FormData();
     formData.append("job_description_id", String(payload.job_description_id));
@@ -113,7 +107,6 @@ export async function postResumeFileUpload(payload: {
     formData.append("candidate_email", payload.candidate_email);
     formData.append("candidate_first_name", payload.candidate_first_name);
     formData.append("candidate_last_name", payload.candidate_last_name);
-    formData.append("company_id", payload.company_id);
 
     const token = store.getState().auth.token;
     const response = await axiosInstance.post(ApiRoute.ResumeUpload, formData, {

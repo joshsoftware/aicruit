@@ -60,8 +60,8 @@ module ResumeService
       merged_params = params.merge(link_to_file:).except(:pdf_file)
       result = ResumeService::Create.new(merged_params, current_user).call
       if result[:success] && result[:data]
-        # Enqueue background job for additional processing
-        ResumeProcessingJob.perform_later(result[:data].object.id.to_s, result[:data].object.link_to_file)
+        # Enqueue a background job for additional processing
+        ResumeProcessingJob.perform_later(result[:data].object.job_description_id.to_s, result[:data].object.id.to_s, result[:data].object.link_to_file)
       end
       result
     end
