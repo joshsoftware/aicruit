@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import NavigateBack from "@/components/NavigateBack";
 import { useQuery } from "@tanstack/react-query";
 import { getApplicantResumes } from "@/services/JobDescription/api";
-import LocalStorage from "@/utils/localStore";
 
 interface ApplicantsPageProps {
   params: {
@@ -51,15 +50,13 @@ const ApplicantsPage: React.FC<ApplicantsPageProps> = ({ params }) => {
     };
   }, [refetch]);
 
-  // Try to read JD title from local storage cache set by details page
+  // Read JD title from query param passed during navigation
   const [jdTitle, setJdTitle] = useState<string>("");
   useEffect(() => {
     try {
-      const cached = LocalStorage.getItem(`jd-details-${jobId}`);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.title) setJdTitle(parsed.title);
-      }
+      const sp = new URLSearchParams(window.location.search);
+      const titleParam = sp.get("title");
+      if (titleParam) setJdTitle(titleParam);
     } catch (_e) {}
   }, [jobId]);
 
