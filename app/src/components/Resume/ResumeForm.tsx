@@ -2,7 +2,7 @@
 import React, { useState, ChangeEvent } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import DisplayUploadedFile from "@/components/DisplayUploadFile";
+import DisplayUploadedFile from "../ui/DisplayUploadFile";
 import { MAX_FILE_SIZE_MB } from "@/constants/constants";
 import { useUploadResume } from "@/services/Resume/hooks";
 
@@ -18,6 +18,18 @@ export default function ResumeForm({ jobId }: Props) {
     const [fileUrl, setFileUrl] = useState("");
     const [fileName, setFileName] = useState<string | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
+
+    // candidate details
+    const [candidateEmail, setCandidateEmail] = useState("");
+    const [candidateFirstName, setCandidateFirstName] = useState("");
+    const [candidateLastName, setCandidateLastName] = useState("");
+    const [companyId, setCompanyId] = useState("");
+
+    const emailValid = candidateEmail ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidateEmail) : false;
+    const filePathRequiresCandidate = uploadType === "file";
+    const formValid = filePathRequiresCandidate
+        ? !!resumeFile && !!candidateFirstName && !!candidateLastName && !!candidateEmail && emailValid && !!companyId
+        : !!fileUrl;
 
     const handleUploadTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
         setUploadType(e.target.value as UploadType);
@@ -48,6 +60,10 @@ export default function ResumeForm({ jobId }: Props) {
             job_description_id: jobId,
             resume_file: uploadType === "file" ? resumeFile ?? undefined : undefined,
             file_url: uploadType === "url" ? (fileUrl || undefined) : undefined,
+            candidate_email: uploadType === "file" ? candidateEmail : undefined,
+            candidate_first_name: uploadType === "file" ? candidateFirstName : undefined,
+            candidate_last_name: uploadType === "file" ? candidateLastName : undefined,
+            company_id: uploadType === "file" ? companyId : undefined,
         });
     };
 
@@ -112,6 +128,55 @@ export default function ResumeForm({ jobId }: Props) {
                         </div>
                     )}
 
+                    {uploadType === "file" && (
+                        <div className="grid grid-cols-1 gap-3 mt-2">
+                            <label className="block text-black-secondary font-medium">
+                                First Name
+                                <input
+                                    type="text"
+                                    value={candidateFirstName}
+                                    onChange={(e) => setCandidateFirstName(e.target.value)}
+                                    placeholder="Enter first name"
+                                    className="px-3 py-2 border rounded-lg w-full"
+                                />
+                            </label>
+                            <label className="block text-black-secondary font-medium">
+                                Last Name
+                                <input
+                                    type="text"
+                                    value={candidateLastName}
+                                    onChange={(e) => setCandidateLastName(e.target.value)}
+                                    placeholder="Enter last name"
+                                    className="px-3 py-2 border rounded-lg w-full"
+                                />
+                            </label>
+                            <label className="block text-black-secondary font-medium">
+                                Email
+                                <input
+                                    type="email"
+                                    value={candidateEmail}
+                                    onChange={(e) => setCandidateEmail(e.target.value)}
+                                    placeholder="Enter email"
+                                    className="px-3 py-2 border rounded-lg w-full"
+                                />
+                                {!emailValid && candidateEmail && (
+                                    <span className="text-xs text-red-500">Please enter a valid email address</span>
+                                )}
+                            </label>
+                            <label className="block text-black-secondary font-medium">
+                                Company ID
+                                <input
+                                    type="text"
+                                    value={companyId}
+                                    onChange={(e) => setCompanyId(e.target.value)}
+                                    placeholder="Enter company id"
+                                    className="px-3 py-2 border rounded-lg w-full"
+                                    inputMode="numeric"
+                                />
+                            </label>
+                        </div>
+                    )}
+
                     {fileName && uploadType === "file" && (
                         <div className="mt-4">
                             <DisplayUploadedFile fileName={fileName} onDelete={() => { setFileName(null); setResumeFile(null); }} />
@@ -121,7 +186,7 @@ export default function ResumeForm({ jobId }: Props) {
                     <div className="mt-6">
                         <Button
                             type="submit"
-                            disabled={disableSubmit || (uploadType === "file" ? !resumeFile : !fileUrl)}
+                            disabled={disableSubmit || !formValid}
                             className="w-full px-4 py-2 text-base text-white bg-purple-dark rounded hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? (

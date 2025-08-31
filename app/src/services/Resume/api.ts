@@ -1,7 +1,6 @@
 import { ApiRoute } from "@/constants/route";
 import store from "@/redux/store";
 import axiosInstance, { pythonAxiosInstance } from "@/utils/axios";
-import LocalStorage from "@/utils/localStore";
 
 export interface Resume {
   id: number;
@@ -68,7 +67,7 @@ export async function getResumesList({
 }: GetResumesListParams): Promise<GetResumesListResponse> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.get<GetResumesListResponse>(
+  const response = await axiosInstance.get(
     ApiRoute.Resumes,
     {
       params: {
@@ -80,7 +79,7 @@ export async function getResumesList({
     }
   );
 
-  return response.data;
+  return response.data as GetResumesListResponse;
 }
 
 export async function getResumeById(
@@ -88,63 +87,33 @@ export async function getResumeById(
 ): Promise<GetResumeByIdResponse> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.get<GetResumeByIdResponse>(
+  const response = await axiosInstance.get(
     `${ApiRoute.Resumes}/${id}`,
     {
       headers: { Authorization: token },
     }
   );
-  return response.data;
-}
-
-function getCandidateMeta() {
-    try {
-        const state = store.getState();
-        const user = state?.auth?.user as any;
-        if (user) {
-            return {
-                candidate_email: user.email || "",
-                candidate_first_name: user.firstName || "",
-                candidate_last_name: user.lastName || "",
-                company_id: (user.comapanyId != null ? String(user.comapanyId) : ""),
-            };
-        }
-        const raw = LocalStorage.getItem(LocalStorage.AUTH_USER_DATA);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            const u = parsed?.user || {};
-            return {
-                candidate_email: u.email || "",
-                candidate_first_name: u.firstName || "",
-                candidate_last_name: u.lastName || "",
-                company_id: (u.comapanyId != null ? String(u.comapanyId) : ""),
-            };
-        }
-    } catch (e) {
-        // ignore and fallback
-    }
-    return {
-        candidate_email: "",
-        candidate_first_name: "",
-        candidate_last_name: "",
-        company_id: "",
-    };
+  return response.data as GetResumeByIdResponse;
 }
 
 export async function postResumeFileUpload(payload: {
     job_description_id: number;
     resume_file: File;
+    candidate_email: string;
+    candidate_first_name: string;
+    candidate_last_name: string;
+    company_id: string;
 }): Promise<PostResumeUploadResponse> {
     const formData = new FormData();
     formData.append("job_description_id", String(payload.job_description_id));
     // rename to pdf_file as per requirement
     formData.append("pdf_file", payload.resume_file);
 
-    const meta = getCandidateMeta();
-    formData.append("candidate_email", meta.candidate_email);
-    formData.append("candidate_first_name", meta.candidate_first_name);
-    formData.append("candidate_last_name", meta.candidate_last_name);
-    formData.append("company_id", meta.company_id);
+    // take values directly from user input
+    formData.append("candidate_email", payload.candidate_email);
+    formData.append("candidate_first_name", payload.candidate_first_name);
+    formData.append("candidate_last_name", payload.candidate_last_name);
+    formData.append("company_id", payload.company_id);
 
     const token = store.getState().auth.token;
     const response = await axiosInstance.post(ApiRoute.ResumeUpload, formData, {

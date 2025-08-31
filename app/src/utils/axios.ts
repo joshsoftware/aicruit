@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { createAcceptHeaderValue } from "@/services/utils";
 import store from "@/redux/store";
 import { resetAuth } from "@/redux/authSlice";
-import LocalStorage from "@/utils/localStore";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -48,9 +47,7 @@ axiosInstance.interceptors.response.use(
             const status = error.response?.status;
             if (status === 401 || status === 403) {
                 try {
-                    // Clear persisted auth
-                    LocalStorage.removeItem(LocalStorage.AUTH_USER_DATA);
-                    // Reset redux auth state
+                    // Reset redux auth state (also clears auth cookie)
                     store.dispatch(resetAuth());
                 } catch (_e) {}
                 // Redirect to login/home

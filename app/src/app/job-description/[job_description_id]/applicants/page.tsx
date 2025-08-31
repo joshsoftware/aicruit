@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import NavigateBack from "@/components/NavigateBack";
+import NavigateBack from "@/components/ui/NavigateBack";
 import { useQuery } from "@tanstack/react-query";
 import { getApplicantResumes } from "@/services/JobDescription/api";
 

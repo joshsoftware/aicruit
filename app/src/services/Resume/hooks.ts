@@ -8,6 +8,10 @@ export interface ResumePayload {
     job_description_id: number;
     resume_file?: File;
     file_url?: string;
+    candidate_email?: string;
+    candidate_first_name?: string;
+    candidate_last_name?: string;
+    company_id?: string;
 }
 
 export function useUploadResume() {
@@ -22,6 +26,10 @@ export function useUploadResume() {
                 await postResumeFileUpload({
                     job_description_id: payload.job_description_id,
                     resume_file: payload.resume_file,
+                    candidate_email: payload.candidate_email || "",
+                    candidate_first_name: payload.candidate_first_name || "",
+                    candidate_last_name: payload.candidate_last_name || "",
+                    company_id: payload.company_id || "",
                 });
                 toast.success("Resume uploaded successfully");
                 router.push(`/job-description/${payload.job_description_id}`);
@@ -39,7 +47,7 @@ export function useUploadResume() {
                 return;
             }
 
-            throw new Error("Please provide a file or a URL");
+          throw new Error("Please provide a file or a URL");
         } catch (err: any) {
             const message = err?.message || "Failed to upload resume";
             toast.error(message);

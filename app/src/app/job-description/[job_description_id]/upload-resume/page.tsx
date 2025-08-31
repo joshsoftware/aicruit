@@ -1,5 +1,5 @@
 import React from "react";
-import NavigateBack from "@/components/NavigateBack";
+import NavigateBack from "@/components/ui/NavigateBack";
 import ResumeForm from "@/components/Resume/ResumeForm";
 
 export default function Page({ params }: { params: { job_description_id: string } }) {
