@@ -45,6 +45,7 @@ gem 'thruster', require: false
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
+  gem 'byebug'
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
 
@@ -82,3 +83,10 @@ gem 'versionist'
 gem 'acts_as_tenant'
 
 gem 'aasm'
+
+gem 'aws-sdk-s3', require: false
+
+# Background job processing
+gem 'sidekiq', '~> 7.2'
+# External service calls
+gem 'httparty', '~> 0.21.0', require: false

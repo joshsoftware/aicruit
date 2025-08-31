@@ -7,6 +7,7 @@ class JobDescription < ApplicationRecord
 
   belongs_to :user
   belongs_to :company
+  has_many :resumes
 
   enum status: { draft: 0, unpublished: 1, published: 2, closed: 3 }
 
@@ -14,7 +15,7 @@ class JobDescription < ApplicationRecord
   validates :user, presence: true
   validates :company, presence: true
   validates :status, presence: true
-  validates :parsed_data, presence: true
+  # validates :parsed_data, presence: true
 
   after_initialize :set_default_status, if: :new_record?
 
