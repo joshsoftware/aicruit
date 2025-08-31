@@ -13,10 +13,37 @@ export interface Resume {
   candidate_last_name: string;
   years_of_experience: number;
   link_to_file: string;
-  referred_by: string;
+  referred_by?: string;
   status: string;
-  matching_score: string;
-  candidate_mobile_no: string;
+  matching_score: number | string;
+  candidate_mobile_no: string | null;
+  parsed_data?: {
+    certifications?: string[];
+    primary_skills?: string[];
+    qualifications?: {
+      name?: string;
+      type?: string;
+      year?: number | null;
+      issuer?: string | null;
+    }[];
+    domain_expertise?: string[];
+    secondary_skills?: string[];
+    years_of_experience?: number | null;
+  };
+  matching_result?: {
+    reasoning?: string[];
+    match_score?: number;
+    matched_skills?: {
+      must_have?: string[];
+      good_to_have?: string[];
+    };
+    missing_skills?: {
+      must_have?: string[];
+      good_to_have?: string[];
+    };
+    experience_match?: boolean;
+    qualification_match?: boolean;
+  };
 }
 
 export interface GetResumesListResponse {
