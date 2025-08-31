@@ -214,3 +214,117 @@ PARSE_JD_PROMPT = """
     Important: You must return only the JSON object. Do not add any explanations, headers, or other text outside the JSON object. If you include anything outside of the JSON, the response will be considered invalid.
     Do not prefix or suffix the response with any text like "Here is the analysis."
 """
+
+RESUME_PARSE_PROMPT = """
+You are an expert resume parser specializing in tech and business resumes. Your task is to meticulously extract specific information and return it as a valid JSON object.
+
+Rules:
+- STRICTLY adhere to the JSON schema.
+- If information is not explicitly present, set the value to null or an empty list (e.g., []). Do NOT guess.
+- Primary skills are core, hard skills (e.g., programming languages, specific frameworks). Secondary skills are softer skills or less central technologies.
+- Domain expertise should be a list of industries or business areas (e.g., 'Finance', 'E-commerce', 'Logistics').
+- Skills should be concise keywords/tokens, not full sentences. Deduplicate and normalize them.
+- **CRITICAL:** For each work experience role, you MUST find and provide the "start_date" and "end_date". If the end date is ongoing, use "present".
+- Output ONLY the JSON object. Do NOT include any markdown, code fences, or explanatory text before or after the JSON.
+
+Schema:
+{{
+  "primary_skills": [string],
+  "secondary_skills": [string],
+  "domain_expertise": [string],
+  "relevant_experience": {{
+    "total_years": number or null,
+    "roles": [
+      {{
+        "title": string or null,
+        "company": string or null,
+        "start_date": string or null,
+        "end_date": string or null,
+        "years": number or null,
+        "highlights": [string]
+      }}
+    ]
+  }},
+  "education_certificates": [
+    {{
+      "name": string,
+      "issuer": string or null,
+      "year": string or null,
+      "type": "degree" | "certification"
+    }}
+  ]
+}}
+
+Resume Text:
+{resume_text}
+"""
+
+
+
+
+
+PARSE_NEWJD_PROMPT="""
+You are an expert job description parser. Parse this JD systematically.
+
+{jd_text}
+
+Return ONLY a JSON object in this format:
+{{
+  "title": null,
+  "company": null,
+  "company_description": null,
+  "experience_required": {{
+    "min_years": null,
+    "max_years": null
+  }},
+  "skills": {{
+    "must_have": ["skill1", "skill2"],
+    "good_to_have": ["skill1", "skill2"]
+  }},
+  "qualifications": ["degree1", "degree2"],
+  "responsibilities": ["resp1", "resp2"],
+  "location": null,
+  "employment_type": "Full-time"
+}}
+"""
+
+
+RESUME_JD_PROMPT_TEMPLATE = """
+You are an expert technical recruiter.
+Compare the given candidate resume with the job description.
+Return STRICT JSON only, no commentary.
+
+### Candidate Resume (parsed JSON):
+{resume_json}
+
+### Job Description (parsed JSON):
+{jd_json}
+
+### Instructions:
+1. Compare candidate’s skills with JD must-have and good-to-have skills.
+2. Evaluate years of experience against JD requirements.
+3. Check if qualifications match JD expectations.
+4. Consider domain expertise if relevant.
+5. Give a match score from 0–100.
+6. Output reasoning in 2–4 short bullet points.
+
+### Output Format (STRICT JSON):
+{{
+  "match_score": <integer>,
+  "reasoning": [
+    "<point 1>",
+    "<point 2>",
+    "<point 3>"
+  ],
+  "matched_skills": {{
+    "must_have": ["..."],
+    "good_to_have": ["..."]
+  }},
+  "missing_skills": {{
+    "must_have": ["..."],
+    "good_to_have": ["..."]
+  }},
+  "qualification_match": true/false,
+  "experience_match": true/false
+}}
+"""
