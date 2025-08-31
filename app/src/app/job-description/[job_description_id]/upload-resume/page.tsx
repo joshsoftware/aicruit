@@ -1,6 +1,6 @@
 import React from "react";
 import NavigateBack from "@/components/ui/NavigateBack";
-import ResumeForm from "@/components/Resume/ResumeForm";
+import ResumeForm from "@/components/Resumes/ResumeForm";
 
 export default function Page({ params }: { params: { job_description_id: string } }) {
     const jobId = Number(params.job_description_id);

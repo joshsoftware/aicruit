@@ -173,6 +173,17 @@ const JobDescriptionDetailsContainer: React.FC<
             handleViewAllResumes={handleViewAllResumes}
           />
           <div className="p-6 space-y-4">
+              {isCandidate && (
+                  <div className="mt-6 border-t pt-6">
+                      <div className="flex justify-center">
+                          <button
+                              onClick={() => router.push(`/job-description/${jobId}/upload-resume`)}
+                              className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
+                              Upload your resume
+                          </button>
+                      </div>
+                  </div>
+              )}
             {!isCandidate && (
                   <div className="flex justify-end mb-4">
                       <div className="relative inline-block text-left">
@@ -281,17 +292,6 @@ const JobDescriptionDetailsContainer: React.FC<
                       </motion.div>
                   );
               })}
-            {isCandidate && (
-              <div className="mt-6 border-t pt-6">
-                <div className="flex justify-center">
-                  <button
-                      onClick={() => router.push(`/job-description/${jobId}/upload-resume`)}
-                      className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
-                    Upload your resume
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
