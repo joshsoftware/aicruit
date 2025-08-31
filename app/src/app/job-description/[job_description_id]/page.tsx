@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useMemo } from "react";
-import { useJobDescriptionDetailsHook } from "@/services/JobDescription/hooks";
+// not clear
+import React, { useState, useEffect } from "react";
+import { useJobDescriptionDetailsHook, useModifyJobDescription } from "@/services/JobDescription/hooks";
 import JobDescriptionEditForm from "@/components/JobDescriptions/JobDescriptionEditForm";
 import JobDescriptionDetailsSkeleton from "@/components/JobDescriptions/JobDescriptionDetailsSkeleton";
 import FetchError from "@/components/ui/FetchError";
@@ -25,6 +26,28 @@ interface JobDescriptionDetailsContainerProps {
 const formatSectionTitle = (key: string): string =>
   key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+const isNil = (v: any): boolean => v === null || v === undefined;
+
+const isEmptyValue = (v: any): boolean => {
+    if (isNil(v)) return true;
+    if (typeof v === "string") return v.trim().length === 0;
+    if (Array.isArray(v)) return v.length === 0; // keep arrays non-empty if they have any items
+    if (typeof v === "object") {
+        // An object is empty if it has no keys OR all of its values are empty
+        const entries = Object.entries(v);
+        if (entries.length === 0) return true;
+        return entries.every(([, val]) => isEmptyValue(val));
+    }
+    return false;
+};
+
+const renderValue = (v: any): React.ReactNode => {
+    if (isNil(v)) return null;
+    if (Array.isArray(v)) return v.join(", ");
+    if (typeof v === "object") return JSON.stringify(v);
+    return String(v);
+};
+
 const JobDescriptionDetailsContainer: React.FC<
   JobDescriptionDetailsContainerProps
 > = ({ params: { job_description_id } }) => {
@@ -34,26 +57,71 @@ const JobDescriptionDetailsContainer: React.FC<
     data: jobDescriptionDetails,
     isFetching,
     isError,
+    refetch
   } = useJobDescriptionDetailsHook(jobId);
   const authUser = useAuthUser();
+
   const isCandidate = authUser?.roleName === UserRoles.CANDIDATE;
 
   const [isEditing, setIsEditing] = useState(false);
   const [sectionVisibility, setSectionVisibility] =
     useState<SectionVisibilityState>({});
+    const { isPending: isUpdatingStatus, modifyMutate } = useModifyJobDescription(jobId);
+    const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
-  useMemo(() => {
-    if (jobDescriptionDetails?.parsed_data) {
-      setSectionVisibility(
-        Object.keys(
-          jobDescriptionDetails.parsed_data
-        ).reduce<SectionVisibilityState>(
-          (acc, key) => ({ ...acc, [key]: true }),
-          {}
-        )
-      );
+    const allStatuses = ["draft", "unpublished", "published", "closed"] as const;
+    const availableStatuses = allStatuses.filter(
+        (s) => s !== (jobDescriptionDetails?.status as typeof allStatuses[number])
+    );
+    const totalApplicants = jobDescriptionDetails?.total_applicants ?? 0;
+// not clear
+    const handleStatusChange = (nextStatus: string) => {
+        if (!nextStatus || isUpdatingStatus) return;
+        modifyMutate({
+            jobId,
+            body: { job_description: { status: nextStatus } },
+        });
+        setStatusMenuOpen(false);
+    };
+
+    useEffect(() => {
+        const pd = jobDescriptionDetails?.parsed_data;
+        if (pd) {
+            const initial = Object.keys(pd).reduce<SectionVisibilityState>((acc, key) => {
+                const val = (pd as any)[key];
+                if (!isEmptyValue(val)) {
+                    acc[key] = true;
+                }
+                return acc;
+            }, {});
+            setSectionVisibility(initial);
     }
-  }, [jobDescriptionDetails]);
+    }, [jobDescriptionDetails?.parsed_data]);
+
+    useEffect(() => {
+        const handlePageShow = (e: any) => {
+            if (e && (e as any).persisted) {
+                refetch();
+            }
+        };
+        const handleVisibility = () => {
+            if (document.visibilityState === "visible") {
+                refetch();
+            }
+        };
+        if (typeof window !== "undefined") {
+            window.addEventListener("pageshow", handlePageShow);
+            document.addEventListener("visibilitychange", handleVisibility);
+        }
+        return () => {
+            if (typeof window !== "undefined") {
+                window.removeEventListener("pageshow", handlePageShow);
+                document.removeEventListener("visibilitychange", handleVisibility);
+            }
+        };
+    }, [refetch]);
+
+    // No localStorage caching; data will be fetched as needed on other pages
 
   const toggleSectionVisibility = (sectionKey: string) => {
     setSectionVisibility((prev) => ({
@@ -81,7 +149,9 @@ const JobDescriptionDetailsContainer: React.FC<
     );
   }
 
-  const sectionKeys = Object.keys(jobDescriptionDetails.parsed_data).sort();
+    const sectionKeys = Object.keys(jobDescriptionDetails.parsed_data)
+        .filter((k) => !isEmptyValue((jobDescriptionDetails.parsed_data as any)[k]))
+        .sort();
 
   const handleViewAllResumes = () => {
     router.push(`${jobId}/resume`);
@@ -90,7 +160,7 @@ const JobDescriptionDetailsContainer: React.FC<
   return (
     <>
       <div className="mt-4 px-6">
-        <NavigateBack />
+        <NavigateBack href="/job-description" />
       </div>
       <div className="p-6 max-w-7xl mx-auto mt-10 space-y-6">
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
@@ -103,61 +173,120 @@ const JobDescriptionDetailsContainer: React.FC<
             handleViewAllResumes={handleViewAllResumes}
           />
           <div className="p-6 space-y-4">
+            {!isCandidate && (
+                  <div className="flex justify-end mb-4">
+                      <div className="relative inline-block text-left">
+                          <button
+                              type="button"
+                              onClick={() => setStatusMenuOpen((prev) => !prev)}
+                              disabled={isUpdatingStatus}
+                              className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                          >
+                              {isUpdatingStatus ? "Updating..." : "Change status"}
+                          </button>
+                          {statusMenuOpen && (
+                              <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                  <div className="py-1" role="menu" aria-orientation="vertical">
+                                      {availableStatuses.map((s) => (
+                                          <button
+                                              key={s}
+                                              type="button"
+                                              onClick={() => handleStatusChange(s)}
+                                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                              role="menuitem"
+                                          >
+                                              {s}
+                                          </button>
+                                      ))}
+                                  </div>
+                              </div>
+                          )}
+                      </div>
+                  </div>
+            )}
             {sectionKeys.map((key) => {
-              const isVisible = sectionVisibility[key];
-              const sectionData = jobDescriptionDetails.parsed_data[key];
+                  const isVisible = sectionVisibility[key] ?? true;
+                  const sectionData = jobDescriptionDetails.parsed_data[key];
 
-              return (
-                <motion.div
-                  key={key}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="border rounded-lg shadow-sm transition-all duration-300 bg-white hover:shadow-lg"
-                >
-                  <button
-                    className="w-full flex justify-between items-center p-4 bg-indigo-50 hover:bg-indigo-100 transition-colors rounded-t-lg hover:cursor-pointer"
-                    onClick={() => toggleSectionVisibility(key)}
-                  >
-                    <h2 className="text-lg font-semibold text-gray-800">
-                      {formatSectionTitle(key)}
-                    </h2>
-                    {isVisible ? (
-                      <ChevronUp className="text-indigo-600" size={20} />
-                    ) : (
-                      <ChevronDown className="text-indigo-600" size={20} />
-                    )}
-                  </button>
-                  {isVisible && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      transition={{ duration: 0.3 }}
-                      className="border-t p-4 bg-gray-50"
-                    >
-                      <ul className="space-y-3">
-                        {Array.isArray(sectionData) &&
-                          sectionData.map((item, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
-                            >
-                              <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
-                              <span className="text-base text-gray-900">
-                                {item}
+                  return (
+                      <motion.div
+                          key={key}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          whileHover={{ scale: 1.05 }}
+                          className="border rounded-lg shadow-sm transition-all duration-300 bg-white hover:shadow-lg"
+                      >
+                          <button
+                              className="w-full flex justify-between items-center p-4 bg-indigo-50 hover:bg-indigo-100 transition-colors rounded-t-lg hover:cursor-pointer"
+                              onClick={() => toggleSectionVisibility(key)}
+                          >
+                              <h2 className="text-lg font-semibold text-gray-800">
+                                  {formatSectionTitle(key)}
+                              </h2>
+                              {isVisible ? (
+                                  <ChevronUp className="text-indigo-600" size={20} />
+                              ) : (
+                                  <ChevronDown className="text-indigo-600" size={20} />
+                              )}
+                          </button>
+                          {isVisible && (
+                              <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  transition={{ duration: 0.3 }}
+                                  className="border-t p-4 bg-gray-50"
+                              >
+                                  <ul className="space-y-3">
+                                      {Array.isArray(sectionData) ? (
+                                          sectionData.map((item, idx) => (
+                                              <li
+                                                  key={idx}
+                                                  className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                                              >
+                                                  <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
+                                                  <span className="text-base text-gray-900">
+                                 {renderValue(item)}
                               </span>
-                            </li>
-                          ))}
-                      </ul>
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
+                              </li>
+                                          ))
+                                      ) : typeof sectionData === "object" && sectionData !== null ? (
+                                          Object.entries(sectionData)
+                                              .filter(([, val]) => !isEmptyValue(val))
+                                              .map(([subKey, val], idx) => (
+                                                  <li
+                                                      key={subKey}
+                                                      className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                                                  >
+                                                      <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
+                                                      <div className="text-base text-gray-900">
+                                                          <span className="font-medium">{formatSectionTitle(subKey)}: </span>
+                                                          <span>{renderValue(val)}</span>
+                                                      </div>
+                                                  </li>
+                                              ))
+                                      ) : !isEmptyValue(sectionData) ? (
+                                          <li
+                                              key="value"
+                                              className="flex items-start gap-3 group hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                                          >
+                                              <span className="h-2 w-2 rounded-full bg-indigo-500 mt-2 group-hover:bg-indigo-600 transition-colors" />
+                                              <span className="text-base text-gray-900">
+                              {renderValue(sectionData)}
+                            </span>
+                                          </li>
+                                      ) : null}
+                                  </ul>
+                              </motion.div>
+                          )}
+                      </motion.div>
+                  );
+              })}
             {isCandidate && (
               <div className="mt-6 border-t pt-6">
                 <div className="flex justify-center">
-                  <button className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
+                  <button
+                      onClick={() => router.push(`/job-description/${jobId}/upload-resume`)}
+                      className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
                     Upload your resume
                   </button>
                 </div>
