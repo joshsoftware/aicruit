@@ -80,6 +80,20 @@ export async function getJobDescriptionDetails(
   };
 }
 
+export async function getJobDescriptionDetailsPublic(
+  id: number
+): Promise<GetJobDescriptionDetailsResponse> {
+  const response = await axiosInstance.get<GetJobDescriptionDetailsResponse>(
+    ApiRoute.JobDescriptions + `/${id}`
+  );
+
+  return {
+    success: response.data.success,
+    data: response.data.data,
+    message: response.data.message,
+  };
+}
+
 export interface EditJobDescriptionFormData {
   job_description: Partial<JobDescription>;
 }

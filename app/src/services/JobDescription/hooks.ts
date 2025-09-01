@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteJobDescription,
   getJobDescriptionDetails,
+  getJobDescriptionDetailsPublic,
   getJobDescriptions,
   getPublishedJobDescriptions,
   postJobDescription,
@@ -53,6 +54,23 @@ export const useJobDescriptionDetailsHook = (id: number) => {
   const { isPending, isError, data, isFetching, refetch } = useQuery({
     queryKey: ["jobdescription-detail", id],
     queryFn: () => getJobDescriptionDetails(id),
+  });
+
+  const jobDescriptionDetails = data?.data;
+
+  return {
+    isPending,
+    isError,
+    data: jobDescriptionDetails,
+    isFetching,
+    refetch,
+  };
+};
+
+export const useJobDescriptionDetailsPublicHook = (id: number) => {
+  const { isPending, isError, data, isFetching, refetch } = useQuery({
+    queryKey: ["jobdescription-detail-public", id],
+    queryFn: () => getJobDescriptionDetailsPublic(id),
   });
 
   const jobDescriptionDetails = data?.data;

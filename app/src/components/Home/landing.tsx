@@ -19,14 +19,23 @@ const Landing = () => {
         <p className={cn(secondaryFont.className, "text-xl ")}>
           {ValidationMessage.LANDING_PAGE}
         </p>
-        <div className="w-full flex">
+        <div className="w-full flex gap-4">
           <Link
             href={BrowserRoute.SignIn}
             className={buttonVariants({
               className: "bg-purple-dark text-white mt-2 px-2 py-0.5 text-lg",
             })}
           >
-            Get Started
+            Sign In
+          </Link>
+          <Link
+            href="/published-job-descriptions"
+            className={buttonVariants({
+              variant: "outline",
+              className: "border-purple-dark text-purple-dark mt-2 px-2 py-0.5 text-lg hover:bg-purple-dark hover:text-white",
+            })}
+          >
+            Explore Jobs
           </Link>
         </div>
       </div>

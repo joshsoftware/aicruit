@@ -4,14 +4,14 @@ module JobDescriptionService
   class Index < Base
     attr_reader :params, :current_user, :message, :data, :job_descriptions
 
-    def initialize(params, current_user)
+    def initialize(params)
       super()
       @params = params
-      @current_user = current_user
+      # @current_user = current_user
     end
 
     def call
-      return failure_response(message, errors) unless validate_user
+      # return failure_response(message, errors) unless validate_user
 
       set_job_descriptions
       set_data
@@ -29,7 +29,7 @@ module JobDescriptionService
     end
 
     def set_job_descriptions
-      @job_descriptions = JobDescription.where(company_id: current_user.company_id)
+      @job_descriptions = JobDescription.all
     end
 
     def set_data

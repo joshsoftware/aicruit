@@ -1,7 +1,7 @@
 "use client";
 // not clear
 import React, { useState, useEffect } from "react";
-import { useJobDescriptionDetailsHook, useModifyJobDescription } from "@/services/JobDescription/hooks";
+import { useJobDescriptionDetailsHook, useJobDescriptionDetailsPublicHook, useModifyJobDescription } from "@/services/JobDescription/hooks";
 import JobDescriptionEditForm from "@/components/JobDescriptions/JobDescriptionEditForm";
 import JobDescriptionDetailsSkeleton from "@/components/JobDescriptions/JobDescriptionDetailsSkeleton";
 import FetchError from "@/components/ui/FetchError";
@@ -53,15 +53,23 @@ const JobDescriptionDetailsContainer: React.FC<
 > = ({ params: { job_description_id } }) => {
   const router = useRouter();
   const jobId = Number(job_description_id);
+  const authUser = useAuthUser();
+  const isAuthenticated = !!authUser;
+
+  // Use authenticated hook if user is logged in, otherwise use public hook
   const {
     data: jobDescriptionDetails,
     isFetching,
     isError,
     refetch
-  } = useJobDescriptionDetailsHook(jobId);
-  const authUser = useAuthUser();
+  } = isAuthenticated 
+    ? useJobDescriptionDetailsHook(jobId)
+    : useJobDescriptionDetailsPublicHook(jobId);
 
   const isCandidate = authUser?.roleName === UserRoles.CANDIDATE;
+  const isUnauthenticated = !authUser;
+  const showApplyButton = isCandidate || isUnauthenticated;
+  const showAdminFeatures = authUser && !isCandidate;
 
   const [isEditing, setIsEditing] = useState(false);
   const [sectionVisibility, setSectionVisibility] =
@@ -160,7 +168,7 @@ const JobDescriptionDetailsContainer: React.FC<
   return (
     <>
       <div className="mt-4 px-6">
-        <NavigateBack href={isCandidate ? "/published-job-descriptions" : "/job-description"} />
+        <NavigateBack href={showApplyButton ? "/published-job-descriptions" : "/job-description"} />
       </div>
       <div className="p-6 max-w-7xl mx-auto mt-10 space-y-6">
         <div className="bg-white rounded-xl shadow-xl overflow-hidden">
@@ -173,7 +181,7 @@ const JobDescriptionDetailsContainer: React.FC<
             handleViewAllResumes={handleViewAllResumes}
           />
           <div className="p-6 space-y-4">
-              {isCandidate && (
+              {showApplyButton && (
                   <div className="mt-6 border-t pt-6">
                       <div className="flex justify-center">
                           <button
@@ -184,7 +192,7 @@ const JobDescriptionDetailsContainer: React.FC<
                       </div>
                   </div>
               )}
-            {!isCandidate && (
+            {showAdminFeatures && (
                   <div className="flex justify-end mb-4">
                       <div className="relative inline-block text-left">
                           <button

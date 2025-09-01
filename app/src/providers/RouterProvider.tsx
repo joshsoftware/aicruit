@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AUTH_USER_COOKIE, PUBLIC_ROUTES } from "@/constants/constants";
+import { AUTH_USER_COOKIE, PUBLIC_ROUTES, isPublicJobDescriptionRoute, isPublicUploadResumeRoute } from "@/constants/constants";
 import { clearCookie, fetchCookie } from "@/utils/cookies";
 
 const RouterProvider = ({ children }: { children: React.ReactNode }) => {
@@ -10,8 +10,10 @@ const RouterProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = () => {
-      if (PUBLIC_ROUTES.includes(pathname)) {
-        clearCookie(AUTH_USER_COOKIE);
+      if (PUBLIC_ROUTES.includes(pathname) || isPublicJobDescriptionRoute(pathname) || isPublicUploadResumeRoute(pathname)) {
+        if (PUBLIC_ROUTES.includes(pathname)) {
+          clearCookie(AUTH_USER_COOKIE);
+        }
         setIsAuthorized(true);
         return;
       }
@@ -39,7 +41,7 @@ const RouterProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
   }, [pathname, router]);
 
-  if (!isAuthorized && !PUBLIC_ROUTES.includes(pathname)) return null;
+  if (!isAuthorized && !PUBLIC_ROUTES.includes(pathname) && !isPublicJobDescriptionRoute(pathname) && !isPublicUploadResumeRoute(pathname)) return null;
 
   return <div>{children}</div>;
 };

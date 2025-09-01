@@ -4,14 +4,14 @@ module ResumeService
   class Upload < Base
     attr_reader :params, :current_user, :link_to_file, :message, :response
 
-    def initialize(params, current_user)
+    def initialize(params, current_user = nil)
       super()
       @params = params
       @current_user = current_user
     end
 
     def call
-      return failure_response(message, errors) unless validate_user
+      # return failure_response(message, errors) unless validate_user
       return failure_response(I18n.t('errors.file.missing')) unless pdf_file_present?
       return failure_response(I18n.t('errors.file.invalid_format')) unless valid_pdf_format?
       return failure_response(message, errors) unless upload_file_to_s3

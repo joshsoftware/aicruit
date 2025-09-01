@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Api::V1::ResumesController < ApplicationController
+  skip_before_action :authenticate!, only: %i[upload]
   def create
     result = ResumeService::Create.new(params, current_user).call
 
@@ -42,7 +43,7 @@ class Api::V1::ResumesController < ApplicationController
   end
 
   def upload
-    result = ResumeService::Upload.new(params, current_user).call
+    result = ResumeService::Upload.new(params).call
 
     if result[:success]
       render json: result.to_h, status: :ok

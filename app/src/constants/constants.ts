@@ -15,7 +15,15 @@ export const UserRoutes: Record<string, string> = {
   DEFAULT: "/",
 };
 
-export const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
+export const PUBLIC_ROUTES = ["/", "/signin", "/signup", "/published-job-descriptions"];
+
+export const isPublicJobDescriptionRoute = (pathname: string): boolean => {
+  return /^\/job-description\/\d+$/.test(pathname);
+};
+
+export const isPublicUploadResumeRoute = (pathname: string): boolean => {
+  return /^\/job-description\/\d+\/upload-resume$/.test(pathname);
+};
 
 export const AUTH_USER_COOKIE = "auth_user_data";
 

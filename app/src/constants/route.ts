@@ -30,9 +30,9 @@ export const BrowserRoute = {
   SignIn: "/signin",
   SignUp: "/signup",
   Analysis: "/analysis",
-    // Job description pages
-    JobDescription: "/job-description",
-    JobDescriptionDetails: "/job-description/[job_description_id]",
-    JobDescriptionUploadResume: "/job-description/[job_description_id]/upload-resume",
-    JobDescriptionApplicants: "/job-description/[job_description_id]/applicants",
+  // Job description pages
+  JobDescription: "/job-description",
+  JobDescriptionDetails: "/job-description/[job_description_id]",
+  JobDescriptionUploadResume: "/job-description/[job_description_id]/upload-resume",
+  JobDescriptionApplicants: "/job-description/[job_description_id]/applicants",
 };
