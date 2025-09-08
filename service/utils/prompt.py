@@ -305,12 +305,12 @@ Return STRICT JSON only, no commentary.
 2. Evaluate years of experience against JD requirements.
 3. Check if qualifications match JD expectations.
 4. Consider domain expertise if relevant.
-5. Give a match score from 0–100.
+5. Give a match score as a float (0.0–10.0)
 6. Output reasoning in 2–4 short bullet points.
 
 ### Output Format (STRICT JSON):
 {{
-  "match_score": <integer>,
+  "match_score": <float>,
   "reasoning": [
     "<point 1>",
     "<point 2>",

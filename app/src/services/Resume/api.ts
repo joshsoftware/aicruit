@@ -1,6 +1,6 @@
 import { ApiRoute } from "@/constants/route";
 import store from "@/redux/store";
-import axiosInstance from "@/utils/axios";
+import axiosInstance, { pythonAxiosInstance } from "@/utils/axios";
 
 export interface Resume {
   id: number;
@@ -11,17 +11,39 @@ export interface Resume {
   candidate_email: string;
   candidate_first_name: string;
   candidate_last_name: string;
-  primary_skills: string[];
-  secondary_skills: string[];
-  domain_expertise: string[];
-  matching_skills: string[];
-  missing_skills: string[];
   years_of_experience: number;
   link_to_file: string;
-  referred_by: string;
+  referred_by?: string;
   status: string;
-  rating: string;
-  candidate_mobile_no: string;
+  matching_score: number | string;
+  candidate_mobile_no: string | null;
+  parsed_data?: {
+    certifications?: string[];
+    primary_skills?: string[];
+    qualifications?: {
+      name?: string;
+      type?: string;
+      year?: number | null;
+      issuer?: string | null;
+    }[];
+    domain_expertise?: string[];
+    secondary_skills?: string[];
+    years_of_experience?: number | null;
+  };
+  matching_result?: {
+    reasoning?: string[];
+    match_score?: number;
+    matched_skills?: {
+      must_have?: string[];
+      good_to_have?: string[];
+    };
+    missing_skills?: {
+      must_have?: string[];
+      good_to_have?: string[];
+    };
+    experience_match?: boolean;
+    qualification_match?: boolean;
+  };
 }
 
 export interface GetResumesListResponse {
@@ -43,6 +65,23 @@ export interface GetResumeByIdResponse {
   message: string;
 }
 
+export interface PostResumeUploadResponse {
+    success: boolean;
+    data: any;
+    message?: string;
+}
+
+export interface ParseResumeResponse {
+    success: boolean;
+    data: { parsed_data: any; title?: string };
+    message?: string;
+}
+
+export interface CreateResumeVariables {
+    job_description_id: number;
+    parsed_data?: any;
+}
+
 export async function getResumesList({
   job_description_id,
   searchKey,
@@ -50,7 +89,7 @@ export async function getResumesList({
 }: GetResumesListParams): Promise<GetResumesListResponse> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.get<GetResumesListResponse>(
+  const response = await axiosInstance.get(
     ApiRoute.Resumes,
     {
       params: {
@@ -62,7 +101,7 @@ export async function getResumesList({
     }
   );
 
-  return response.data;
+  return response.data as GetResumesListResponse;
 }
 
 export async function getResumeById(
@@ -70,11 +109,52 @@ export async function getResumeById(
 ): Promise<GetResumeByIdResponse> {
   const state = store.getState();
   const token = state.auth.token;
-  const response = await axiosInstance.get<GetResumeByIdResponse>(
+  const response = await axiosInstance.get(
     `${ApiRoute.Resumes}/${id}`,
     {
       headers: { Authorization: token },
     }
   );
-  return response.data;
+  return response.data as GetResumeByIdResponse;
+}
+
+export async function postResumeFileUpload(payload: {
+    job_description_id: number;
+    resume_file: File;
+    candidate_email: string;
+    candidate_first_name: string;
+    candidate_last_name: string;
+}): Promise<PostResumeUploadResponse> {
+    const formData = new FormData();
+    formData.append("job_description_id", String(payload.job_description_id));
+    // rename to pdf_file as per requirement
+    formData.append("pdf_file", payload.resume_file);
+
+    // take values directly from user input
+    formData.append("candidate_email", payload.candidate_email);
+    formData.append("candidate_first_name", payload.candidate_first_name);
+    formData.append("candidate_last_name", payload.candidate_last_name);
+
+    const token = store.getState().auth.token;
+    const response = await axiosInstance.post(ApiRoute.ResumeUpload, formData, {
+        headers: { Authorization: token },
+    });
+    return response.data;
+}
+
+export async function parseResumeFromUrl(payload: { file_url: string }): Promise<ParseResumeResponse> {
+    const formData = new FormData();
+    formData.append("file_url", payload.file_url);
+    const response = await pythonAxiosInstance.post(ApiRoute.ParseResume, formData);
+    return response.data;
+}
+
+export async function createResumeFromParsed(variables: CreateResumeVariables) {
+    const token = store.getState().auth.token;
+    const response = await axiosInstance.post(
+        ApiRoute.Resumes,
+        { resume: variables },
+        { headers: { Authorization: token } }
+    );
+    return response.data;
 }

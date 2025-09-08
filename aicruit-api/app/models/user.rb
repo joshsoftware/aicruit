@@ -11,7 +11,11 @@ class User < ApplicationRecord
   has_many :resumes
 
   validates :first_name, :last_name, presence: true, length: { maximum: 150 }
-  validates :email, presence: true, uniqueness: { scope: :company_id }, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :email,
+            presence: true,
+            uniqueness: { scope: :company_id },
+            format: { with: URI::MailTo::EMAIL_REGEXP },
+            unless: -> { role == 'candidate' }
 
   validates :password, format: { with: PASSWORD_REGEX }, length: { minimum: 8 }, allow_blank: true
 

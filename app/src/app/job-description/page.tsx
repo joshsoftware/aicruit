@@ -1,16 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGetJobDescriptions } from "@/services/JobDescription/hooks";
 import JobDescriptionTable from "@/components/JobDescriptions/JobDescriptionList";
 import JobDescriptionTableSkeleton from "@/components/JobDescriptions/JobDescriptionListSkeleton";
 import FetchError from "@/components/ui/FetchError";
 import { Button } from "@/components/ui/button";
+import useAuthUser from "@/hooks/useAuthUser";
+import { UserRoles } from "@/constants/constants";
 
 export default function Page() {
   const { jobDescriptions, isLoading, isError } = useGetJobDescriptions();
   const router = useRouter();
+  const user = useAuthUser();
+
+  useEffect(() => {
+    if (user?.roleName === UserRoles.CANDIDATE) {
+      router.replace("/published-job-descriptions");
+    }
+  }, [user?.roleName, router]);
 
   if (isLoading) {
     return <JobDescriptionTableSkeleton />;

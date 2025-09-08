@@ -18,9 +18,12 @@ const ResumeDetailsHeader = ({ resumeData }: Props) => {
     years_of_experience,
     link_to_file,
     status,
+    parsed_data,
   } = resumeData;
   const fullName = `${candidate_first_name} ${candidate_last_name}`;
   const initials = `${candidate_first_name.charAt(0)}${candidate_last_name.charAt(0)}`;
+  const totalExperience =
+    (parsed_data?.years_of_experience ?? years_of_experience ?? 0) as number;
 
   return (
     <div className="mt-10">
@@ -47,7 +50,7 @@ const ResumeDetailsHeader = ({ resumeData }: Props) => {
                 <div className="flex items-center mt-1">
                   <Briefcase className="h-4 w-4 mr-1 text-gray-500" />
                   <span className="text-gray-600">
-                    {years_of_experience} years of experience
+                    {totalExperience} years of experience
                   </span>
                 </div>
               </div>

@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  require "sidekiq/web"
+
+  Rails.application.routes.draw do
+    mount Sidekiq::Web => "/sidekiq"
+  end
+
   # Health status endpoint
   get 'up' => 'rails/health#show', as: :rails_health_check
 
@@ -20,12 +26,14 @@ Rails.application.routes.draw do
         post :create
         get :index
         get :published
+        post :upload
       end
 
       member do
         put :update
         delete :destroy
         get :show
+        get :applicant_resumes
       end
     end
 
@@ -33,6 +41,7 @@ Rails.application.routes.draw do
       collection do
         get :index  
         post :create
+        post :upload
       end
       
       member do

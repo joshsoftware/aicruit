@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_12_090227) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_31_182458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,7 +30,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_090227) do
     t.bigint "company_id", null: false
     t.string "title"
     t.string "file_url"
-    t.jsonb "parsed_data"
+    t.jsonb "parsed_data", default: {}
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -47,18 +47,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_090227) do
     t.string "candidate_email", null: false
     t.string "candidate_first_name", null: false
     t.string "candidate_last_name", null: false
-    t.json "primary_skills", default: []
-    t.json "secondary_skills", default: []
-    t.json "domain_expertise", default: []
-    t.json "matching_skills", default: []
-    t.json "missing_skills", default: []
-    t.integer "years_of_experience"
     t.string "link_to_file"
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "parsed_data", default: {}
     t.string "candidate_mobile_no"
-    t.string "rating"
+    t.integer "years_of_experience"
+    t.jsonb "matching_result", default: {}
+    t.float "matching_score", default: 0.0
     t.index ["candidate_email", "job_description_id"], name: "index_resumes_on_candidate_email_and_job_description_id", unique: true
     t.index ["company_id"], name: "index_resumes_on_company_id"
     t.index ["job_description_id"], name: "index_resumes_on_job_description_id"

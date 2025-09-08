@@ -32,7 +32,7 @@ from google.oauth2 import service_account
 from utils.constants import LLM, SCOPES, TEMPERATURE
 from typing import Optional, Dict
 import io
-from conversation_diarization.jd_parser import read_docx 
+from conversation_diarization.jd_parser import read_docx
 from conversation_diarization.jd_interview_aligner import parse_jd_from_llm
 from matcher import match_resume_to_jd
 
@@ -47,6 +47,7 @@ import time
 from parse_s3_url import get_text_from_s3_file  # your helper module
 from fastapi import FastAPI, HTTPException
 from resume_parser import parse_resume_skills_experience_education
+
 app = FastAPI()
 
 # Load environment variables
@@ -65,13 +66,16 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
 @app.get("/")
 def root_route():
     return 'Hello, this is the root route for lingo ai server'
 
+
 class Body(BaseModel):
     audio_file_link: str
     speaker_diarization: bool
+
 
 @api_version(1)
 @app.post("/upload-audio")
@@ -79,52 +83,54 @@ async def upload_audio(body: Body):
     try:
         #check if string is empty
         if body.audio_file_link == "":
-            return JSONResponse(status_code=400, content={"message":"Invalid file link"})
+            return JSONResponse(status_code=400, content={"message": "Invalid file link"})
         # Check file type
-        if not body.audio_file_link.endswith(('.m4a', '.mp4','.mp3','.webm','.mpga','.wav','.mpeg','.ogg')):
+        if not body.audio_file_link.endswith(('.m4a', '.mp4', '.mp3', '.webm', '.mpga', '.wav', '.mpeg', '.ogg')):
             logger.error("invalid file type")
-            return JSONResponse(status_code=400, content={"message":"Invalid file type"})
+            return JSONResponse(status_code=400, content={"message": "Invalid file type"})
         translation = translate_with_whisper(body.audio_file_link)
-
 
         logger.info("translation done")
         summary = summarize_using_openai(translation)
 
-
         logger.info("summary done")
-        return JSONResponse(content={"message": "File processed successfully!", "translation":translation, "summary": summary}, status_code=200)
+        return JSONResponse(
+            content={"message": "File processed successfully!", "translation": translation, "summary": summary},
+            status_code=200)
 
     except Exception as e:
         logger.info(traceback.format_exc())
         return JSONResponse(content={"message": str(e)}, status_code=500)
-    
+
+
 @api_version(2)
 @app.post("/upload-audio")
 async def upload_audio(body: Body):
     try:
         #check if string is empty
         if body.audio_file_link == "":
-            return JSONResponse(status_code=400, content={"message":"Invalid file link"})
+            return JSONResponse(status_code=400, content={"message": "Invalid file link"})
         # Check file type
-        if not body.audio_file_link.endswith(('.m4a', '.mp4','.mp3','.webm','.mpga','.wav','.mpeg','.ogg')):
+        if not body.audio_file_link.endswith(('.m4a', '.mp4', '.mp3', '.webm', '.mpga', '.wav', '.mpeg', '.ogg')):
             logger.error("invalid file type")
-            return JSONResponse(status_code=400, content={"message":"Invalid file type"})
+            return JSONResponse(status_code=400, content={"message": "Invalid file type"})
         translation = translate_with_whisper_timestamped(body.audio_file_link)
 
         logger.info("translation done")
         summary = summarize_using_ollama(translation["text"])
 
         logger.info("summary done")
-        result = generate_timestamp_jon(translation,summary)
+        result = generate_timestamp_jon(translation, summary)
         logger.info(result)
 
         return JSONResponse(content=result, status_code=200)
-        
+
 
     except Exception as e:
         logger.info(traceback.format_exc())
         return JSONResponse(content={"message": str(e)}, status_code=500)
-    
+
+
 versions = Versionizer(
     app=app,
     prefix_format='/v{major}',
@@ -139,53 +145,56 @@ async def audio_transcription_from_network(request: AudioTranscriptionRequest):
     try:
         transcription = transcribe_audio(request.audio)
         return JSONResponse(content={"transcription": transcription["full_transcript"]}, status_code=200)
-    
+
     except Exception as e:
         return JSONResponse(content={"result": str(e)}, status_code=500)
-    
+
+
 @app.post("/audio-transcription/file")
 async def audio_transcription_from_file(file: UploadFile):
     try:
         transcription = transcribe_audio(file.file)
         return JSONResponse(content={"transcription": transcription["full_transcript"]}, status_code=200)
-    
+
     except Exception as e:
         return JSONResponse(content={"result": str(e)}, status_code=500)
-    
+
+
 @app.post("/get-action-from-audio")
 async def get_action_from_transcription(file: UploadFile):
     try:
         # Transcribe
         # transcription = transcribe_audio(audio=file.file, translate=True)
         translation = translate_with_whisper(file.file)
-        
+
         # Get action
         # action = extract_action_from_transcription(transcription["full_transcript"])
         action = extract_action_from_transcription(translation)
-        
+
         # Return response
         return JSONResponse(content={"result": action}, status_code=200)
-    
+
     except Exception as e:
         print(e)
         return JSONResponse(content={"result": str(e)}, status_code=500)
 
+
 @app.post("/analyse-interview")
 async def analyse_interview(
-    candidate_name: str = Form(...),
-    interviewer_name: str = Form(...),
-    core_technology: str = Form(...),
-    interview_link: Optional[str] = Form(None),
-    job_description_link: str = Form(...),
-    interview_transcript: Optional[str] = Form(None),
-    transcript_file: UploadFile = File(None),
-    background_tasks: BackgroundTasks = None,
+        candidate_name: str = Form(...),
+        interviewer_name: str = Form(...),
+        core_technology: str = Form(...),
+        interview_link: Optional[str] = Form(None),
+        job_description_link: str = Form(...),
+        interview_transcript: Optional[str] = Form(None),
+        transcript_file: UploadFile = File(None),
+        background_tasks: BackgroundTasks = None,
 ):
     ANALYSIS_STATUS = "pending"
     print("Request received")
     try:
         db_connection_string = os.getenv('DATABASE_URL')
-    
+
         # Request payload validation
         if not all([interviewer_name, candidate_name, job_description_link]):
             return JSONResponse(status_code=400, content={"message": "Invalid request, missing params"})
@@ -194,11 +203,11 @@ async def analyse_interview(
             transcript_file_contents = read_contents_of_file(transcript_file)
         else:
             transcript_file_contents = None
-        
+
         # Create record
         analysis_id = insert_interview_analysis(
             conn_string=db_connection_string,
-            user_id='x7w6qksaibnh2usz', #TODO: replace with actual user's id
+            user_id='x7w6qksaibnh2usz',  #TODO: replace with actual user's id
             candidate_name=candidate_name,
             interviewer_name=interviewer_name,
             interview_recording_link=interview_link if interview_link else None,
@@ -208,8 +217,9 @@ async def analyse_interview(
         )
 
         if not analysis_id:
-            return JSONResponse(content={"message": "Failed to process the request, please try again."}, status_code=500)
-        
+            return JSONResponse(content={"message": "Failed to process the request, please try again."},
+                                status_code=500)
+
         request = {
             "candidate_name": candidate_name,
             "interviewer_name": interviewer_name,
@@ -219,7 +229,7 @@ async def analyse_interview(
             "transcript_file_contents": transcript_file_contents,
             "core_technology": core_technology,
         }
-        
+
         # Schedule background task for analysis
         background_tasks.add_task(
             process_interview_analysis,
@@ -227,13 +237,15 @@ async def analyse_interview(
             analysis_id,
             request
         )
-        
+
         # Respond immediately to the client
-        return JSONResponse(content={"message": "Request received and is in progress", "analysis_id": analysis_id}, status_code=202)
+        return JSONResponse(content={"message": "Request received and is in progress", "analysis_id": analysis_id},
+                            status_code=202)
 
     except Exception as e:
         return JSONResponse(content={"result": str(e)}, status_code=500)
- 
+
+
 # Request model
 class JDRequest(BaseModel):
     id: str
@@ -315,7 +327,7 @@ def process_jd_parse_and_callback(jd_id: str, file_url: str):
         print(f"JD parse: payload_size={payload_size}")
 
         # Send data to Rails API using the shared function
-        success = send_data_to_rails_api(payload, "job_description")
+        success = send_data_to_rails_api(payload, jd_id, "job_description")
         if success:
             print(f"JD parse: completed successfully id={jd_id}")
         else:
@@ -323,8 +335,6 @@ def process_jd_parse_and_callback(jd_id: str, file_url: str):
 
     except Exception as e:
         print(f"Error in process_jd_parse_and_callback: {e}")
-
-
 
 
 def process_interview_analysis(conn_string, analysis_id, request):
@@ -355,7 +365,8 @@ def process_interview_analysis(conn_string, analysis_id, request):
             conversation = transcription_result["conversation"]
 
         # Perform job description alignment
-        analysis_result = align_interview_with_job_description(request['job_description_link'], questions_answers, request['core_technology'])
+        analysis_result = align_interview_with_job_description(request['job_description_link'], questions_answers,
+                                                               request['core_technology'])
 
         # Update record in the database
         analysis_updated = update_interview_analysis(
@@ -377,8 +388,9 @@ def process_interview_analysis(conn_string, analysis_id, request):
     except Exception as e:
         print(f"Error processing analysis for record ID {analysis_id}: {e}")
 
-def insert_interview_analysis(conn_string, user_id, candidate_name, interviewer_name, 
-                              interview_recording_link, interview_transcript_link, 
+
+def insert_interview_analysis(conn_string, user_id, candidate_name, interviewer_name,
+                              interview_recording_link, interview_transcript_link,
                               job_description_document_link, status):
     """
     Insert a new record into the interview_analysis table and return the generated ID.
@@ -623,13 +635,15 @@ def extract_conversation_from_transcript(file_text):
 class ResumeRequest(BaseModel):
     id: str
     file_url: str
+    job_description_id: str = None
 
 @app.post("/parse-resume")
 async def parse_resume_api(request_body: ResumeRequest, request: Request, background_tasks: BackgroundTasks):
     try:
-        print(f"Resume parse: enqueue background task id={request_body.id}, file_url={request_body.file_url}")
+        print(f"Resume parse: enqueue background task job description id= {request_body.job_description_id} resume id={request_body.id}, file_url={request_body.file_url}")
         background_tasks.add_task(
             process_resume_parse_and_callback,
+            request_body.job_description_id,
             request_body.id,
             request_body.file_url,
         )
@@ -653,7 +667,7 @@ async def parse_resume_api(request_body: ResumeRequest, request: Request, backgr
             }
         )
 
-def send_data_to_rails_api(payload: dict, endpoint_type: str = "resume") -> bool:
+def send_data_to_rails_api(payload: dict, resource_id: str, endpoint_type: str = "resume") -> bool:
     """Send data to Rails API and return success status"""
     try:
         rails_base_url = os.getenv("RAILS_API_BASE_URL")
@@ -664,7 +678,7 @@ def send_data_to_rails_api(payload: dict, endpoint_type: str = "resume") -> bool
         # Get endpoint from environment variables
         if endpoint_type == "resume":
             endpoint = os.getenv("RAILS_RESUME_ENDPOINT", "/resumes")
-            method = "POST"
+            method = "PUT"
         elif endpoint_type == "job_description":
             endpoint = os.getenv("RAILS_JD_ENDPOINT", "/job_descriptions")
             method = "PUT"
@@ -672,7 +686,7 @@ def send_data_to_rails_api(payload: dict, endpoint_type: str = "resume") -> bool
             print(f"Unknown endpoint type: {endpoint_type}")
             return False
 
-        url = f"{rails_base_url}{endpoint}"
+        url = f"{rails_base_url}{endpoint}/{resource_id}"
         accept_header = os.getenv("RAILS_ACCEPT_HEADER")
         rails_api_token = os.getenv("RAILS_API_TOKEN")
         headers = {"Content-Type": "application/json"}
@@ -699,9 +713,9 @@ def send_data_to_rails_api(payload: dict, endpoint_type: str = "resume") -> bool
         print(f"Error sending data to Rails API: {e}")
         return False
 
-def process_resume_parse_and_callback(jd_id: str, file_url: str):
+def process_resume_parse_and_callback(jd_id: str, resume_id: str, file_url: str):
     try:
-        print(f"Resume parse: start background task jd_id={jd_id}, file_url={file_url}")
+        print(f"Resume parse: start background task resume_id={resume_id}, file_url={file_url}")
         
         # 1) Download and extract text
         resume_text = get_text_from_s3_file(file_url)
@@ -734,7 +748,7 @@ def process_resume_parse_and_callback(jd_id: str, file_url: str):
         # 3) Call matcher with parsed resume data and JD ID
         try:
             print("Calling matcher with resume data and JD ID...")
-            match_result = match_resume_to_jd(parsed_data, jd_id)
+            match_result = match_resume_to_jd(parsed_data, int(jd_id))
             print(f"Matcher result: {match_result}")
             
         except Exception as e:
@@ -746,7 +760,7 @@ def process_resume_parse_and_callback(jd_id: str, file_url: str):
             "resume": {
                 "parsed_data": parsed_data,
                 "matching_result": match_result,
-                "job_description_id": jd_id
+                "status": 1
             }
         }
         
@@ -757,7 +771,7 @@ def process_resume_parse_and_callback(jd_id: str, file_url: str):
         print(f"Resume parse: payload_size={payload_size}")
 
         # Send data to Rails API using the new function
-        success = send_data_to_rails_api(payload)
+        success = send_data_to_rails_api(payload, resume_id, "resume")
         if success:
             print("Successfully sent data to Rails API")
         else:
