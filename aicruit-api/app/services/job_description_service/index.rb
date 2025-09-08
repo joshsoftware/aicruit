@@ -7,26 +7,15 @@ module JobDescriptionService
     def initialize(params)
       super()
       @params = params
-      # @current_user = current_user
     end
 
     def call
-      # return failure_response(message, errors) unless validate_user
-
       set_job_descriptions
       set_data
       success_response(message, data)
     end
 
     private
-
-    def validate_user
-      unless current_user
-        @message = I18n.t('model.found.failure', model_name: 'User')
-        return false
-      end
-      true
-    end
 
     def set_job_descriptions
       @job_descriptions = JobDescription.all

@@ -2,16 +2,14 @@
 
 module ResumeService
   class Upload < Base
-    attr_reader :params, :current_user, :link_to_file, :message, :response
+    attr_reader :params, :link_to_file, :message, :response
 
-    def initialize(params, current_user = nil)
+    def initialize(params)
       super()
       @params = params
-      @current_user = current_user
     end
 
     def call
-      # return failure_response(message, errors) unless validate_user
       return failure_response(I18n.t('errors.file.missing')) unless pdf_file_present?
       return failure_response(I18n.t('errors.file.invalid_format')) unless valid_pdf_format?
       return failure_response(message, errors) unless upload_file_to_s3
@@ -22,14 +20,6 @@ module ResumeService
     end
 
     private
-
-    def validate_user
-      unless current_user
-        @message = I18n.t('model.found.failure', model_name: 'User')
-        return false
-      end
-      true
-    end
 
     def pdf_file_present?
       params[:pdf_file].present?
@@ -58,7 +48,7 @@ module ResumeService
 
     def create_resume
       merged_params = params.merge(link_to_file:).except(:pdf_file)
-      result = ResumeService::Create.new(merged_params, current_user).call
+      result = ResumeService::Create.new(merged_params).call
       if result[:success] && result[:data]
         # Enqueue a background job for additional processing
         ResumeProcessingJob.perform_later(result[:data].object.job_description_id.to_s, result[:data].object.id.to_s, result[:data].object.link_to_file)

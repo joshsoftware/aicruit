@@ -13,5 +13,4 @@ class Resume < ApplicationRecord
 
   validates :candidate_email, presence: true, uniqueness: { scope: :job_description_id, message: 'has already been used for this job'}
   validates :candidate_first_name, :candidate_last_name, presence: true
-  # validates :primary_skills, presence: true
 end

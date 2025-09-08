@@ -2,12 +2,11 @@
 
 module ResumeService
   class Create < Base
-    attr_reader :params, :current_user, :job_description
+    attr_reader :params, :job_description
 
-    def initialize(params, current_user = nil)
+    def initialize(params)
       super()
       @params = params
-      @current_user = current_user
     end
 
     def call
@@ -47,8 +46,6 @@ module ResumeService
     end
 
     def create_resume
-      # referred_by = resume_params[:candidate_email] == current_user&.email ? nil : current_user
-      # merged_params = resume_params.merge(user_id: @candidate.id, referred_by: referred_by, company_id: job_description&.company_id)
       merged_params = resume_params.merge(user_id: @candidate&.id, company_id: job_description&.company_id)
       @resume = Resume.new(merged_params)
       @resume.save!
