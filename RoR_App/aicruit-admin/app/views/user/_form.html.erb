@@ -1,0 +1,40 @@
+<!-- app/views/users/new.html.erb and app/views/users/edit.html.erb -->
+<h2><%= action_name == 'new' ? 'Create New User' : 'Edit User' %></h2>
+
+<%= form_with(model: @user, url: (@user.new_record? ? new_user_path : user_path(@user)), local: true) do |form| %>
+  <% if @user.errors.any? %>
+    <div class="errors">
+      <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+      <ul>
+        <% @user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <table class="table">
+    <tr>
+      <td><%= form.label :first_name %></td>
+      <td><%= form.text_field :first_name, class: 'form-control' %></td>
+    </tr>
+    <tr>
+      <td><%= form.label :last_name %></td>
+      <td><%= form.text_field :last_name, class: 'form-control' %></td>
+    </tr>
+    <tr>
+      <td><%= form.label :email %></td>
+      <td><%= form.email_field :email, class: 'form-control' %></td>
+    </tr>
+    <tr>
+      <td><%= form.label :password %></td>
+      <td><%= form.password_field :password, class: 'form-control' %></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <%= form.submit action_name == 'new' ? 'Create Account' : 'Update User', class: 'btn btn-primary' %>
+      </td>
+    </tr>
+  </table>
+
+<% end %>

@@ -1,0 +1,14 @@
+<h2>User Details</h2>
+
+<!-- Display users name, email, and other attributes -->
+<div>
+    <p><strong>ID:</strong> <%= @user.id %></p>
+    <p><strong>First Name:</strong> <%= @user.first_name %></p>
+    <p><strong>List Name:</strong> <%= @user.last_name %></p>
+    <p><strong>Email:</strong> <%= @user.email %></p>
+    <p><strong>Phone Number:</strong> <%= @user.contact_number %></p>
+    <p><strong>Role:</strong> <%= @user.role.name %></p>
+    <p><strong>Joined on:</strong> <%= @user.created_at.strftime("%B %d, %Y") %></p>
+</div>
+
+
