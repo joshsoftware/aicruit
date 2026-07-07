@@ -9,6 +9,7 @@ export enum UserRoles {
 }
 
 export const UserRoutes: Record<string, string> = {
+  [UserRoles.SUPER_ADMIN]: "/job-description",
   [UserRoles.HR_ADMIN]: "/job-description",
   [UserRoles.HR]: "/job-description",
   [UserRoles.CANDIDATE]: "/published-job-descriptions",

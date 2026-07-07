@@ -182,7 +182,8 @@ def _call_model(prompt_text: str, model: Optional[str] = None) -> str:
             raise RuntimeError(f"API failed {r.status_code}: {r.text}")
         return r.json()["choices"][0]["message"]["content"]
     # Local Ollama
-    llm = Ollama(model=model, temperature=TEMPERATURE, model_kwargs={"num_ctx": int(os.getenv("RESUME_NUM_CTX", "8192"))})
+    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    llm = Ollama(model=model, temperature=TEMPERATURE, base_url=ollama_host, num_ctx=int(os.getenv("RESUME_NUM_CTX", "8192")))
     return llm.invoke(prompt_text)
 
 def parse_resume_skills_experience_education(resume_text: str) -> Dict[str, Any]:

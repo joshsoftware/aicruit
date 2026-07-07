@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 class Api::V1::JobDescriptionsController < ApplicationController
-  skip_before_action :authenticate!, only: %i[published index show]
+  skip_before_action :authenticate!, only: %i[published index show download]
+  before_action :authenticate_optional!, only: %i[published index show download]
 
   def create
     authorize! :create, JobDescription
@@ -84,6 +85,24 @@ class Api::V1::JobDescriptionsController < ApplicationController
       render json: result.to_h, status: :ok
     else
       render json: result.to_h, status: :unprocessable_entity
+    end
+  end
+
+  def download
+    job_description = JobDescription.find(params[:id])
+    unless job_description.published?
+      authorize! :read, job_description
+    end
+
+    if job_description.file_url.present?
+      result = AwsService::S3Download.new(job_description.file_url).call
+      if result[:success]
+        send_data result[:data][:content], filename: result[:data][:filename], type: result[:data][:content_type], disposition: 'inline'
+      else
+        render json: result.to_h, status: :unprocessable_entity
+      end
+    else
+      render json: { success: false, message: "No file associated with this job description" }, status: :not_found
     end
   end
 end

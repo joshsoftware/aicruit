@@ -34,6 +34,7 @@ Rails.application.routes.draw do
         delete :destroy
         get :show
         get :applicant_resumes
+        get :download
       end
     end
 
@@ -47,6 +48,7 @@ Rails.application.routes.draw do
       member do
         get :show
         put :update
+        get :download
       end
     end
   end

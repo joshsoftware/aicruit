@@ -16,12 +16,16 @@ if not aws_access_key or not aws_secret_key:
     raise EnvironmentError("AWS credentials not found in environment variables")
 
 # S3 client
-s3 = boto3.client(
-    "s3",
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=aws_region
-)
+aws_endpoint = os.getenv("AWS_ENDPOINT")
+s3_kwargs = {
+    "aws_access_key_id": aws_access_key,
+    "aws_secret_access_key": aws_secret_key,
+    "region_name": aws_region
+}
+if aws_endpoint:
+    s3_kwargs["endpoint_url"] = aws_endpoint
+
+s3 = boto3.client("s3", **s3_kwargs)
 
 # =====================
 # Helper: Parse S3 URL
