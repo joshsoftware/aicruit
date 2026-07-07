@@ -8,4 +8,11 @@ class ResumeSerializer < ActiveModel::Serializer
   attribute :referred_by, if: -> { object.referred_by.present? } do
     "#{object.referred_by.first_name} #{object.referred_by.last_name}"
   end
+
+  def link_to_file
+    if object.link_to_file.present?
+      api_url = ENV.fetch('RAILS_API_EXTERNAL_URL', 'http://joshsoftware.lvh.me:3000')
+      "#{api_url}/api/v1/resumes/#{object.id}/download"
+    end
+  end
 end

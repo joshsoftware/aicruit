@@ -47,13 +47,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_31_182458) do
     t.string "candidate_email", null: false
     t.string "candidate_first_name", null: false
     t.string "candidate_last_name", null: false
+    t.integer "years_of_experience"
     t.string "link_to_file"
     t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.jsonb "parsed_data", default: {}
     t.string "candidate_mobile_no"
-    t.integer "years_of_experience"
+    t.jsonb "parsed_data", default: {}
     t.jsonb "matching_result", default: {}
     t.float "matching_score", default: 0.0
     t.index ["candidate_email", "job_description_id"], name: "index_resumes_on_candidate_email_and_job_description_id", unique: true

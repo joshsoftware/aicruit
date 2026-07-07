@@ -90,7 +90,8 @@ def match_resume_to_jd(resume: dict, jd_id: int, max_retries: int = 3) -> dict:
             else:
                 # Local Ollama mode
                 print("⚡ Using local Ollama model for matching")
-                llm = Ollama(model=DEFAULT_MODEL, temperature=0.0)
+                ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+                llm = Ollama(model=DEFAULT_MODEL, temperature=0.0, base_url=ollama_host)
                 chain = prompt | llm
                 content = chain.invoke({
                     "resume_json": json.dumps(resume, ensure_ascii=False),

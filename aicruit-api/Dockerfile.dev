@@ -1,0 +1,26 @@
+FROM ruby:3.3.2-slim
+
+# Install system dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      git \
+      libpq-dev \
+      pkg-config \
+      curl \
+      postgresql-client && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+WORKDIR /rails
+
+# Install gems
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler && bundle install
+
+# Copy entrypoint script
+COPY bin/docker-entrypoint /rails/bin/
+RUN chmod +x /rails/bin/docker-entrypoint
+
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+EXPOSE 3000
+CMD ["bundle", "exec", "rails", "s", "-b", "0.0.0.0", "-p", "3000"]

@@ -32,7 +32,7 @@ class Base
   end
 
   def jwt_encode(payload, exp = 1.days.from_now)
-    secret_key = Rails.application.credentials.secret_key_base
+    secret_key = Rails.application.secret_key_base
     payload[:exp] = exp.to_i
     JWT.encode(payload, secret_key)
   end

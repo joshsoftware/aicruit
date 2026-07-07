@@ -1,0 +1,166 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: aicruit-db-container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aicruit_development
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aicruit-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: aicruit-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  createbuckets:
+    image: minio/mc
+    container_name: aicruit-minio-create-buckets
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/aicruit-bucket || true;
+      /usr/bin/mc anonymous set public myminio/aicruit-bucket || true;
+      exit 0;
+      "
+
+  api:
+    build:
+      context: ./aicruit-api
+      dockerfile: Dockerfile.dev
+    container_name: aicruit-rails-api
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && bundle exec rails s -b 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./aicruit-api:/rails
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ./aicruit-api/.env
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_BUCKET_NAME: aicruit-bucket
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT: http://minio:9000
+      RAILS_API_EXTERNAL_URL: http://joshsoftware.lvh.me:3000
+      REDIS_URL: redis://redis:6379/0
+
+  sidekiq:
+    build:
+      context: ./aicruit-api
+      dockerfile: Dockerfile.dev
+    container_name: aicruit-sidekiq
+    command: bundle exec sidekiq
+    volumes:
+      - ./aicruit-api:/rails
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    env_file:
+      - ./aicruit-api/.env
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_BUCKET_NAME: aicruit-bucket
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT: http://minio:9000
+      RAILS_API_EXTERNAL_URL: http://joshsoftware.lvh.me:3000
+      REDIS_URL: redis://redis:6379/0
+
+  python-service:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    container_name: aicruit-python-service
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./service:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    env_file:
+      - ./service/.env
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      AWS_BUCKET_NAME: aicruit-bucket
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT: http://minio:9000
+      PYTHONUNBUFFERED: "1"
+
+  frontend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    container_name: aicruit-next-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+    depends_on:
+      - api
+      - python-service
+    env_file:
+      - ./app/.env.local
+
+volumes:
+  pgdata:
+  miniodata:
+  redisdata:

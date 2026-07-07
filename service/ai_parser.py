@@ -97,7 +97,8 @@ def parse_jd_with_ai(jd_text: str) -> Dict:
         # Local Ollama Mode
         # --------------------
         print("⚡ Using local Ollama model")
-        llm = Ollama(model=DEFAULT_MODEL)
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        llm = Ollama(model=DEFAULT_MODEL, base_url=ollama_host)
         response_text = llm.invoke(
             PARSE_NEWJD_PROMPT.format(jd_text=jd_text)
         )

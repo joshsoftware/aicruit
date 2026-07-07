@@ -58,7 +58,7 @@ export const useUser = () => {
       toast.success(ValidationMessage.SIGNIN_SUCCESS);
       // User role based navigation
       const userRole = res?.data?.user.role_name;
-      router.push(UserRoutes[userRole]);
+      router.push(UserRoutes[userRole] || UserRoutes.DEFAULT || "/");
     },
     onError: (error) => handleErrorResponse(error),
 

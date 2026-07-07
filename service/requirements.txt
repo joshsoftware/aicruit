@@ -37,7 +37,7 @@ numpy<2
 wget
 nemo_toolkit[asr]==2.0.0rc0
 nltk
-psycopg2
+psycopg2-binary
 python-multipart
 git+https://github.com/SYSTRAN/faster-whisper.git #Reaplce with 'faster-whisper==VERSION' once a new version with BatchedInferencePipeline is deployed to PYPI
 git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git
@@ -60,3 +60,5 @@ mammoth        # optional, for .doc files
 textract       # optional, handles many file types automatically
 fuzzywuzzy[speedup]  # or rapidfuzz
 docx2txt
+pyarrow<15
+neptune

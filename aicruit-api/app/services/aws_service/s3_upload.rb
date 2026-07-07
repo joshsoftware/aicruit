@@ -16,11 +16,17 @@ module AwsService
 
     def call
       begin
-        s3_client = Aws::S3::Client.new(
+        options = {
           access_key_id: ENV.fetch('AWS_ACCESS_KEY_ID', nil),
           secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY', nil),
           region: ENV.fetch('AWS_REGION', 'us-east-1')
-        )
+        }
+        if ENV['AWS_ENDPOINT'].present?
+          options[:endpoint] = ENV['AWS_ENDPOINT']
+          options[:force_path_style] = true
+        end
+
+        s3_client = Aws::S3::Client.new(options)
         # Upload the file to S3
         response = s3_client.put_object(
           bucket: bucket_name,

@@ -6,4 +6,11 @@ class JobDescriptionSerializer < ActiveModel::Serializer
   attribute :total_applicants do
     object.resumes.count
   end
+
+  def file_url
+    if object.file_url.present?
+      api_url = ENV.fetch('RAILS_API_EXTERNAL_URL', 'http://joshsoftware.lvh.me:3000')
+      "#{api_url}/api/v1/job_descriptions/#{object.id}/download"
+    end
+  end
 end

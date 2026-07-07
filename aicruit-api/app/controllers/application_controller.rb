@@ -35,6 +35,24 @@ class ApplicationController < ActionController::API
     end
   end
 
+  def authenticate_optional!
+    header = request.headers['Authorization']
+    header = header.split.last if header
+    return unless header.present?
+
+    if header == ENV['PYTHON_SERVICE_API_KEY']
+      @current_user = nil
+      @current_service = "python_service"
+      return
+    end
+
+    begin
+      jwt_payload(header)
+    rescue JWT::DecodeError, ActiveRecord::RecordNotFound
+      # Do not render unauthorized or raise; just let guest access continue
+    end
+  end
+
   def set_current_tenant
     subdomain = request.subdomains.first
     return unless subdomain.present?
@@ -69,7 +87,7 @@ class ApplicationController < ActionController::API
   private
 
   def jwt_decode(token)
-    JWT.decode(token, Rails.application.credentials.secret_key_base)[0]
+    JWT.decode(token, Rails.application.secret_key_base)[0]
   end
 
   def handle_record_invalid(exception)
