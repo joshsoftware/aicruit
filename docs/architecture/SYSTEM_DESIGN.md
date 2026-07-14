@@ -113,54 +113,47 @@ flowchart TB
 
 ## 3. Technology Stack
 
-The sections below list **all viable options** per component. The team selects one from each based on familiarity, scale requirements, and commercial constraints. No option is pre-decided - the architecture works with any combination.
+The following technologies have been selected for the platform to balance rapid MVP development with long-term scalability.
 
 ---
 
 ### Frontend
 
-| Component | Options |
-|-----------|---------|
-| Framework | React, Vue, Angular, Svelte |
-| Language | TypeScript, JavaScript |
-| State management | Redux Toolkit, Zustand, Jotai, React Query, Context API |
-| Routing | React Router, TanStack Router, Next.js App Router |
-| UI component library | TailwindCSS, Material UI, Ant Design, Chakra UI, shadcn/ui |
-| Form management | React Hook Form, Formik, TanStack Form |
-| HTTP client | Axios, Fetch API, TanStack Query |
-| File upload | Pre-signed S3 URLs via frontend (bypasses backend) |
-| Build tooling | Vite, Next.js, Create React App, Turbopack |
-| Testing | Vitest, Jest, React Testing Library, Playwright, Cypress |
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| Framework | React (JavaScript) | Vue, Angular, Svelte | Team familiarity, rich ecosystem, SPA model fits this product |
+| UI Library | Modern React Library + TailwindCSS | Material UI, Ant Design, Chakra UI, shadcn/ui | Rapid styling and responsive design |
+| File Upload | Pre-signed S3 URLs via frontend | - | Bypasses backend server to save bandwidth |
+| Other Tooling | Vite, Axios, React Router, Vitest | Next.js, Redux, Playwright, Cypress | Standard React ecosystem defaults |
 
 ---
 
 ### Backend
 
-The backend handles REST APIs, authentication, job orchestration, async task dispatch, and AI processing logic. Python is the preferred language because the AI/ML ecosystem (LLM SDKs, document parsing libraries, prompt engineering tooling) is strongest in Python.
+The backend handles REST APIs, authentication, job orchestration, async task dispatch, and AI processing logic. Python is chosen because the AI/ML ecosystem is strongest in Python.
 
-| Component | Options |
-|-----------|---------|
-| Framework | FastAPI, Django REST Framework, Flask, Litestar |
-| ORM / data access | SQLAlchemy, Django ORM, Tortoise ORM, Peewee |
-| Schema validation | Pydantic, Marshmallow, cerberus |
-| Auth tokens | python-jose, PyJWT, authlib |
-| Password hashing | passlib (bcrypt), argon2-cffi |
-| API documentation | Auto-generated (FastAPI/OpenAPI), drf-spectacular, Swagger |
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| Framework | FastAPI (Python) | Django REST Framework, Flask, Litestar | Async-native, auto-generated OpenAPI, strong LLM SDK support |
+| Schema Validation | Pydantic | Marshmallow, cerberus | Aligns perfectly with FastAPI and JSONB schemas |
+| API Documentation | Auto-generated via FastAPI | drf-spectacular, Swagger | Zero-maintenance Swagger UI |
+| Email Service | SendGrid or Resend | - | Simple API, generous free tier for MVP volumes |
+| Data Access | SQLAlchemy (TBD) | Django ORM, Tortoise ORM, Peewee | Standard for FastAPI |
+| Auth & Crypto | python-jose, passlib (bcrypt) | authlib, argon2-cffi | Proven security |
 
 ---
 
 ### AI Processing
 
-AI processing runs as a module within the backend codebase. All AI tasks (JD extraction, resume parsing, matching) are executed by background workers - separate OS processes running the same codebase with a different entrypoint. This keeps AI logic co-located with the business logic while ensuring long-running LLM calls never block API responses.
+AI processing runs as a module within the backend codebase. All AI tasks are executed by background workers to ensure long-running LLM calls never block API responses.
 
-| Component | Options |
-|-----------|---------|
-| LLM provider | OpenAI (GPT-4o, GPT-4-turbo), Anthropic Claude, Google Gemini, Mistral, self-hosted Ollama |
-| LLM orchestration | LangChain, LlamaIndex, custom prompt pipeline |
-| Document parsing - PDF | pdfplumber, PyMuPDF, PyPDF2 |
-| Document parsing - DOCX | python-docx |
-| Speech-to-text (Phase 2) | OpenAI Whisper, Google Speech-to-Text, AWS Transcribe, AssemblyAI |
-| Speaker diarization (Phase 2) | NeMo MSDD, pyannote.audio |
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| LLM Provider | OpenAI (GPT-4o) | Anthropic Claude, Google Gemini, Mistral | Primary provider for the strongest structured JSON output |
+| Local LLM | Ollama | - | Option for local development to avoid API costs |
+| Document Parsing | pdfplumber / python-docx | PyMuPDF, PyPDF2 | Python-native text extraction |
+| Orchestration | Custom prompt pipeline / LangChain | LlamaIndex | Simple is better for MVP |
+| Audio (Phase 2) | OpenAI Whisper, NeMo MSDD | Google STT, AWS Transcribe, pyannote | Documented for future phase |
 
 ---
 
@@ -168,39 +161,34 @@ AI processing runs as a module within the backend codebase. All AI tasks (JD ext
 
 All AI tasks run asynchronously. The API server enqueues a job; a worker picks it up and processes it in the background, then writes results directly to the database.
 
-| Component | Options |
-|-----------|---------|
-| Task queue | Celery, Dramatiq, Huey, ARQ |
-| Message broker | RabbitMQ, Redis Streams, AWS SQS, Google Pub/Sub |
-| Worker result backend | PostgreSQL, Redis |
-| Scheduling (cron jobs) | Celery Beat, APScheduler, cloud-native schedulers |
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| Message Broker | Redis | RabbitMQ, AWS SQS, Google Pub/Sub | Serves as both broker and result backend |
+| Task Queue | Celery / Dramatiq / ARQ | Huey | Redis-backed; final framework chosen during setup |
+| Scheduling | Celery Beat / APScheduler | cloud-native schedulers | Standard Python scheduling |
 
 ---
 
 ### Data Layer
 
-| Component | Options |
-|-----------|---------|
-| Primary database | PostgreSQL, MySQL, CockroachDB |
-| Object storage - production | AWS S3, Google Cloud Storage, Azure Blob Storage |
-| Object storage - local dev | Any S3-compatible emulator (e.g. LocalStack, MinIO) |
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| Primary Database | PostgreSQL | MySQL, CockroachDB | JSONB support required for AI-extracted data, proven reliability |
+| Object Storage | S3-compatible | Google Cloud Storage, Azure Blob Storage | S3 API is the standard. MinIO simplifies Docker-based local dev |
 
-> **Storage note**: Object storage (S3 or equivalent) is the single source of truth for all uploaded files - JD documents and resumes. A local S3-compatible emulator is used during development only. In staging and production, a managed cloud object storage service is used directly.
+> **Storage note**: Object storage is the single source of truth for all uploaded files (JDs and resumes). A local MinIO container is used during development. In production, a managed S3-compatible service is used directly.
 
 ---
 
 ### Infrastructure
 
-| Component | Options |
-|-----------|---------|
-| Containerisation | Docker |
-| Container orchestration | Kubernetes, AWS ECS, Google Cloud Run, Docker Swarm |
-| Container registry | Docker Hub, AWS ECR, GitHub Container Registry, GCR |
-| API gateway / reverse proxy | Nginx, Traefik, Kong, AWS API Gateway, Caddy |
-| Cloud provider | AWS, GCP, Azure, DigitalOcean |
-| Secrets management | AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager, Kubernetes Secrets |
-
----
+| Component | Selection | Alternative Options Considered | Rationale |
+|-----------|-----------|--------------------------------|-----------|
+| Containerisation | Docker | - | Mandatory per architecture - same images across all environments |
+| Repository | Monorepo | - | Simplifies coordination during early development |
+| Orchestration | AWS ECS / Cloud Run (TBD) | Kubernetes, Docker Swarm | To be decided at deployment |
+| API Gateway | Nginx / Caddy | Traefik, Kong, AWS API Gateway | Standard reverse proxy |
+| Cloud & Secrets | AWS / AWS Secrets Manager (TBD) | GCP, Azure, HashiCorp Vault | Depends on chosen cloud provider |
 
 ### Key Constraints That Drive Choices
 
