@@ -167,12 +167,35 @@ The following are explicitly excluded from MVP:
 6. Reviews matched skills (green), missing skills (red), experience timeline
 7. Shortlists or rejects the candidate
 
-### Journey 5: HR Schedules Interview (Direct Invite)
+### Journey 5: HR Schedules Interview & Hands Off to Phase 2
 
-1. HR selects a shortlisted candidate
-2. Enters meeting link, date/time
-3. System creates interview record (status: `scheduled`)
-4. Email sent to candidate with meeting link and time
+> **Architectural Note**: Phase 2 is being developed by a separate team. Management will make the final decision on whether Phase 2 will be deployed as an independent microservice or integrated as a modular component within the Phase 1 monolith.
+
+**Phase 1:**
+1. HR selects a shortlisted candidate.
+2. HR schedules the interview with a date and time.
+3. The system creates an interview record (`status: scheduled`).
+4. The system sends a `POST` request payload to Phase 2, passing the candidate's resume summary, JD summary, and experience details.
+
+**Phase 2:**
+5. Phase 2 receives the payload and generates a unique session with a meeting link.
+6. An email is sent to the candidate containing the meeting link and scheduled time.
+7. The Phase 2 AI pre-generates 10-15 targeted interview questions based on the candidate/JD summaries and stores them in its database (e.g., NoSQL).
+
+### Journey 6: Candidate Joins AI Video Interview (Phase 2)
+
+**Phase 2:**
+1. The candidate clicks the meeting link and joins the interview at the scheduled time.
+2. A human (HR) may optionally join the same interview session.
+3. The interview session is created and started.
+4. The AI interviewer greets the candidate and begins asking the pre-generated questions.
+5. The candidate and AI interviewer speak in turn.
+6. The session ends upon time completion.
+7. The meeting transcription is saved to the Phase 2 database.
+8. An interview screening output is generated based on performance metrics.
+
+**Phase 2 → Phase 1 Handoff:**
+9. Phase 2 sends the candidate's final evaluation report back to Phase 1 to update the candidate's final status.
 
 ---
 
