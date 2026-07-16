@@ -167,24 +167,23 @@ The following are explicitly excluded from MVP:
 6. Reviews matched skills (green), missing skills (red), experience timeline
 7. Shortlists or rejects the candidate
 
-### Journey 5: HR Schedules Interview & Hands Off to Phase 2
+### Journey 5: HR Schedules Interview & Hands Off to AI-Screening Service
 
-> **Architectural Note**: Phase 2 is being developed by a separate team. Management will make the final decision on whether Phase 2 will be deployed as an independent microservice or integrated as a modular component within the Phase 1 monolith.
+> **Architectural Note**: AI-Screening is being developed by a separate team. Need to take a call on whether AI-Screening will be maintained as an independent microservice or integrated as a modular component within the AICruit Platform monolith.
 
-**Phase 1:**
+**AICruit Platform:**
 1. HR selects a shortlisted candidate.
 2. HR schedules the interview with a date and time.
 3. The system creates an interview record (`status: scheduled`).
-4. The system sends a `POST` request payload to Phase 2, passing the candidate's resume summary, JD summary, and experience details.
+4. The system sends a `POST` request payload to AI-Screening, passing the candidate's resume summary, JD summary, and experience details.
 
-**Phase 2:**
-5. Phase 2 receives the payload and generates a unique session with a meeting link.
+**AI-Screening Service:**
+5. Screening service receives the payload and generates a unique session with a meeting link.
 6. An email is sent to the candidate containing the meeting link and scheduled time.
-7. The Phase 2 AI pre-generates 10-15 targeted interview questions based on the candidate/JD summaries and stores them in its database (e.g., NoSQL).
+7. The service pre-generates 10-15 targeted interview questions based on the candidate/JD summaries and stores them in its database (e.g., NoSQL).
 
-### Journey 6: Candidate Joins AI Video Interview (Phase 2)
+### Journey 6: Candidate Joins AI Video Interview (AI-Screening Round)
 
-**Phase 2:**
 1. The candidate clicks the meeting link and joins the interview at the scheduled time.
 2. A human (HR) may optionally join the same interview session.
 3. The interview session is created and started.
@@ -194,8 +193,7 @@ The following are explicitly excluded from MVP:
 7. The meeting transcription is saved to the Phase 2 database.
 8. An interview screening output is generated based on performance metrics.
 
-**Phase 2 → Phase 1 Handoff:**
-9. Phase 2 sends the candidate's final evaluation report back to Phase 1 to update the candidate's final status.
+9. Screening service sends the candidate's final evaluation report back to AICruit Platform to update the candidate's final status and submit the report.
 
 ---
 
